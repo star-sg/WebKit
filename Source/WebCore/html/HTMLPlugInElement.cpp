@@ -377,8 +377,10 @@ bool HTMLPlugInElement::requestObject(const String& relativeURL, const String& m
         completedURL = document().completeURL(relativeURL);
 
     ReplacementPlugin* replacement = pluginReplacementForType(completedURL, mimeType);
-    if (!replacement || !replacement->isEnabledBySettings(document().settings()))
-        return false;
+//    if (!replacement || !replacement->isEnabledBySettings(document().settings()))
+//        return false;
+    
+    if (!replacement) return 0;
 
     LOG(Plugins, "%p - Found plug-in replacement for %s.", this, completedURL.string().utf8().data());
 
