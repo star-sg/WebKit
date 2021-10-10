@@ -16,9 +16,8 @@
 namespace WebCore {
 
 JSC::JSValue JSAnalyserNode::evil_func(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    (void)globalObject;
-//    auto argument = JSC::jsCast<JSCell*>(callFrame.argument(0));
-    auto argument = callFrame.argument(0);
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    auto argument = convert<IDLInterface<AudioNode>>(globalObject, argument0.value());
     (void)argument;
     return JSC::JSValue();
 }
