@@ -1,0 +1,12 @@
+<script>
+    let audioContext;
+    let analyserNode;
+    try {
+	audioContext = new AudioContext();
+    } catch(e) {
+	alert('Web Audio API is not supported in this browser');
+    }
+    analyserNode = audioContext.createAnalyser();
+    tmp = {a: 1, b: "123"};
+    alert(analyserNode.evil_func(analyserNode));
+</script>

@@ -578,6 +578,8 @@ VM::VM(VMType vmType, HeapType heapType, WTF::RunLoop* runLoop, bool* success)
 
     if (!g_jscConfig.disabledFreezingForTesting)
         Config::permanentlyFreeze();
+    
+    
 }
 
 static ReadWriteLock s_destructionLock;
