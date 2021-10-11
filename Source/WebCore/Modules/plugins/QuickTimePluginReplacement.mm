@@ -216,10 +216,14 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
         return false;
     }
 
+    printf("[ MY DEBUG %d ] QuickTimePluginReplacement = %p\n", getpid(), this);
+    
     // Get the scripting interface.
     value = replacement.get(lexicalGlobalObject, JSC::Identifier::fromString(vm, "scriptObject"));
     if (!scope.exception() && !value.isUndefinedOrNull()) {
         m_scriptObject = value.toObject(lexicalGlobalObject);
+        printf("[ MY DEBUG %d ] this = %p\n", getpid(), this);
+        printf("[ MY DEBUG %d ] m_scriptObject = %p\n", getpid(), m_scriptObject);
         scope.assertNoException();
     }
 

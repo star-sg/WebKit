@@ -35,8 +35,13 @@ ALWAYS_INLINE void* CompleteSubspace::allocateNonVirtual(VM& vm, size_t size, GC
     if constexpr (validateDFGDoesGC)
         vm.heap.verifyCanGC();
 
-    if (Allocator allocator = allocatorForNonVirtual(size, AllocatorForMode::AllocatorIfExists))
-        return allocator.allocate(vm.heap, deferralContext, failureMode);
+    if (Allocator allocator = allocatorForNonVirtual(size, AllocatorForMode::AllocatorIfExists)) {
+        auto result = allocator.allocate(vm.heap, deferralContext, failureMode);
+        if (size == 64 && !strcmp(this->name(), "JSCell")) {
+            printf("[ MY DEBUG %d ] New pointer in JSCell was allocated at %p\n", getpid(), result);
+        }
+        return result;
+    }
     return allocateSlow(vm, size, deferralContext, failureMode);
 }
 
