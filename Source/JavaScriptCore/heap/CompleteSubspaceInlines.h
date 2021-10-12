@@ -38,7 +38,26 @@ ALWAYS_INLINE void* CompleteSubspace::allocateNonVirtual(VM& vm, size_t size, GC
     if (Allocator allocator = allocatorForNonVirtual(size, AllocatorForMode::AllocatorIfExists)) {
         auto result = allocator.allocate(vm.heap, deferralContext, failureMode);
         if (size == 64 && !strcmp(this->name(), "JSCell")) {
-            printf("[ MY DEBUG %d ] New pointer in JSCell was allocated at %p\n", getpid(), result);
+            LocalAllocator* localAllocator = allocator.localAllocator();
+            FreeList& fl = localAllocator->getFreeList();
+            
+            int cnt = 0;
+            fl.forEach(
+               [&] (HeapCell* cell) {
+                cnt++;
+                (void)cell;
+               });
+            
+            printf("[ MY DEBUG %d ] ALLOCATE NON VIRTUAL\n", getpid());
+            printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
+            printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
+            printf("[ MY DEBUG %d ] New pointer in JSCell ( %p ) was allocated at %p by allocator %p\n", getpid(), this, result, localAllocator);
+            printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
+            printf("[ MY DEBUG %d ] \tNumber of free cells = %d\n", getpid(), cnt);
+            printf("[ MY DEBUG %d ] \tpayloadEnd = %p\n", getpid(), fl.m_payloadEnd);
+            printf("[ MY DEBUG %d ] \tremaining = %u\n", getpid(), fl.m_remaining);
+            printf("[ MY DEBUG %d ] \toriginalSize = %u\n", getpid(), fl.m_originalSize);
+            printf("[ MY DEBUG %d ] ===============================================================\n", getpid());
         }
         return result;
     }

@@ -36,6 +36,20 @@ JSC::JSValue JSAnalyserNode::evil_func(JSC::JSGlobalObject& globalObject, JSC::C
     LocalAllocator* localAllocator = allocator.localAllocator();
     FreeList& fl = localAllocator->getFreeList();
     
+    printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
+    printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
+    printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
+    printf("[ MY DEBUG %d ] \tpayloadEnd = %p\n", getpid(), fl.m_payloadEnd);
+    printf("[ MY DEBUG %d ] \tremaining = %u\n", getpid(), fl.m_remaining);
+    printf("[ MY DEBUG %d ] \toriginalSize = %u\n", getpid(), fl.m_originalSize);
+    printf("[ MY DEBUG %d ] Freed cells:\n", getpid());
+    
+    fl.forEach(
+       [&] (HeapCell* cell) {
+            printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), bitwise_cast<void *>(cell));
+       });
+    
+    
     (void)globalObject;
     (void)scriptObject;
     (void)fl;

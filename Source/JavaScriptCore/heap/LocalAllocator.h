@@ -58,6 +58,8 @@ public:
     bool isFreeListedCell(const void*) const;
     
     FreeList& getFreeList() { return m_freeList; }
+    MarkedBlock::Handle* getCurrentBlock() { return m_currentBlock; }
+    MarkedBlock::Handle* getLastActiveBlock() { return m_lastActiveBlock; }
     
 private:
     friend class BlockDirectory;
