@@ -46,6 +46,7 @@
     
     // Evil stuffs
     [Custom] undefined evil_func();
+    [Custom] undefined angel_func();
 
     // Real-time waveform data
     [EnabledBySetting=ModernUnprefixedWebAudio] undefined getFloatTimeDomainData(Float32Array array);

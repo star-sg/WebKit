@@ -2,5 +2,10 @@
     <embed id="worker" src="data:video/mp4;"></embed>
 <script>
     window.top.postMessage("Child created", "http://127.0.0.1");
+    /*
+    window.addEventListener("message", (event) => {
+	console.log(worker.GetURL);
+    }, false);
+    */
 </script>
 </body>

@@ -1,4 +1,3 @@
-
 function createPluginReplacement()
 {
     return new Replacement();
@@ -16,7 +15,11 @@ Replacement.prototype = {
     MethodMap: {
         getSth : 'getSth'
     },
- 
+
+    getSth: function() {
+        return 1337;
+    },
+
     createScriptInterface: function()
     {
         for (name in this.MethodMap) {
@@ -24,8 +27,4 @@ Replacement.prototype = {
             this.scriptObject[name] = this[methodName].bind(this);
         }
     },
-
-    getSth: function() {
-        return 1337;
-    }
 };

@@ -109,6 +109,7 @@ JSC_DEFINE_CUSTOM_GETTER(pluginElementPropertyGetter, (JSGlobalObject* lexicalGl
     if (!scriptObject)
         return JSValue::encode(jsUndefined());
     
+    printf("[ MY DEBUG %d ] Getting property from scriptObject: %p\n", getpid(), scriptObject);
     return JSValue::encode(scriptObject->get(lexicalGlobalObject, propertyName));
 }
 

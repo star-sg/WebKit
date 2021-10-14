@@ -37,7 +37,7 @@ ALWAYS_INLINE void* CompleteSubspace::allocateNonVirtual(VM& vm, size_t size, GC
 
     if (Allocator allocator = allocatorForNonVirtual(size, AllocatorForMode::AllocatorIfExists)) {
         auto result = allocator.allocate(vm.heap, deferralContext, failureMode);
-        if (size == 64 && !strcmp(this->name(), "JSCell")) {
+        if (!strcmp(this->name(), "JSCell")) {
             LocalAllocator* localAllocator = allocator.localAllocator();
             FreeList& fl = localAllocator->getFreeList();
             
@@ -48,7 +48,7 @@ ALWAYS_INLINE void* CompleteSubspace::allocateNonVirtual(VM& vm, size_t size, GC
                 (void)cell;
                });
             
-            printf("[ MY DEBUG %d ] ALLOCATE NON VIRTUAL\n", getpid());
+            printf("[ MY DEBUG %d ] ALLOCATE NON VIRTUAL %lu\n", getpid(), size);
             printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
             printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
             printf("[ MY DEBUG %d ] New pointer in JSCell ( %p ) was allocated at %p by allocator %p\n", getpid(), this, result, localAllocator);

