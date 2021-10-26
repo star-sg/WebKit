@@ -1,0 +1,10 @@
+<body>
+    <embed id="worker" src="data:video/mp4;"></embed>
+<script>
+    window.top.postMessage("Child created", "http://127.0.0.1");
+    worker = document.getElementById("worker");
+    window.addEventListener("DOMNodeRemoved", function() {
+	console.log(worker.GetURL);
+    });
+</script>
+</body>

