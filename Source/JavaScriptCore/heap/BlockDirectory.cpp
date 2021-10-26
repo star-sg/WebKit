@@ -86,6 +86,8 @@ MarkedBlock::Handle* BlockDirectory::findBlockForAllocation(LocalAllocator& allo
             return nullptr;
         
         unsigned blockIndex = allocator.m_allocationCursor++;
+        if ( m_cellSize == 64 )
+            printf("[ MY DEBUG %d ] Getting block: %u\n", getpid(), blockIndex);
         MarkedBlock::Handle* result = m_blocks[blockIndex];
         setIsCanAllocateButNotEmpty(NoLockingNecessary, blockIndex, false);
         return result;
@@ -249,6 +251,7 @@ void BlockDirectory::endMarking()
     }
     
     if (false) {
+        dump(WTF::dataFile());
         dataLog("Bits for ", m_cellSize, ", ", m_attributes, " after endMarking:\n");
         dumpBits(WTF::dataFile());
     }

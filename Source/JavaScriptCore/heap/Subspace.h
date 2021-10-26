@@ -102,6 +102,8 @@ public:
     virtual void didBeginSweepingToFreeList(MarkedBlock::Handle*);
 
     bool isIsoSubspace() const { return m_isIsoSubspace; }
+    
+    BlockDirectory* getFirstEmptyDirectory() { return m_directoryForEmptyAllocation; }
 
 protected:
     void initialize(HeapCellType*, AlignedMemoryAllocator*);

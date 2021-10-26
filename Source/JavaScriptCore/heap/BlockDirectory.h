@@ -130,6 +130,28 @@ public:
     Subspace* subspace() const { return m_subspace; }
     MarkedSpace& markedSpace() const;
     
+    void dumpBlocks() {
+        printf("[ MY DEBUG %d ] Dump all blocks:\n", getpid());
+        for(MarkedBlock::Handle* h : m_blocks) {
+            printf("[ MY DEBUG %d ] \tBlock %p\n", getpid(), &h->block());
+            h->forEachCell(
+                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
+                    if (h->isLive(cell) == false) {
+                        printf("[ MY DEBUG %d ] \t\tDead cell: %p\n", getpid(), bitwise_cast<void *>(cell));
+                    }
+                    return IterationStatus::Continue;
+            });
+            h->forEachCell(
+                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
+                    void *p = bitwise_cast<void *>(cell);
+                    if (h->block().isMarkedRaw(p) == false) {
+                        printf("[ MY DEBUG %d ] \t\tMarked cell: %p\n", getpid(), p);
+                    }
+                    return IterationStatus::Continue;
+            });
+        }
+    }
+    
     void dump(PrintStream&) const;
     void dumpBits(PrintStream& = WTF::dataFile());
     

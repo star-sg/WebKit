@@ -60,7 +60,7 @@ public:
     FreeList& getFreeList() { return m_freeList; }
     MarkedBlock::Handle* getCurrentBlock() { return m_currentBlock; }
     MarkedBlock::Handle* getLastActiveBlock() { return m_lastActiveBlock; }
-    
+    BlockDirectory* getBlockDirectory() { return m_directory; }
 private:
     friend class BlockDirectory;
     
