@@ -100,9 +100,11 @@ MarkedBlock::Handle* BlockDirectory::findBlockForAllocation(LocalAllocator& allo
 {
     for (;;) {
         allocator.m_allocationCursor = (m_bits.canAllocateButNotEmpty() | m_bits.empty()).findBit(allocator.m_allocationCursor, true);
+//        if (cellSize() == 64 && !strcmp(subspace()->name(), "JSCell")) {
+//            printf("[ MY DEBUG %d ] m_allocationCursor after finding: %u\n", getpid(), allocator.m_allocationCursor);
+//        }
         if (allocator.m_allocationCursor >= m_blocks.size())
             return nullptr;
-        
         unsigned blockIndex = allocator.m_allocationCursor++;
         MarkedBlock::Handle* result = m_blocks[blockIndex];
         setIsCanAllocateButNotEmpty(NoLockingNecessary, blockIndex, false);
@@ -267,10 +269,11 @@ void BlockDirectory::endMarking()
         m_bits.destructible() = m_bits.live();
     }
     
-    if (false) {
-        dataLog("Bits for ", m_cellSize, ", ", m_attributes, " after endMarking:\n");
-        dumpBits(WTF::dataFile());
-    }
+//    if (cellSize() == 64 && !strcmp(subspace()->name(), "JSCell")) {
+//        dump(WTF::dataFile());
+//        dataLog("[ MY DEBUG 1 ] Bits for ", m_cellSize, ", ", m_attributes, " after endMarking:\n");
+//        dumpBits(WTF::dataFile());
+//    }
 }
 
 void BlockDirectory::snapshotUnsweptForEdenCollection()
@@ -355,7 +358,7 @@ RefPtr<SharedTask<MarkedBlock::Handle*()>> BlockDirectory::parallelNotEmptyBlock
 
 void BlockDirectory::dump(PrintStream& out) const
 {
-    out.print(RawPointer(this), ":", m_cellSize, "/", m_attributes);
+    out.print("[ MY DEBUG 1 ] ", RawPointer(this), ":", m_cellSize, "/", m_attributes, "\n");
 }
 
 void BlockDirectory::dumpBits(PrintStream& out)
@@ -372,7 +375,7 @@ void BlockDirectory::dumpBits(PrintStream& out)
     forEachBitVectorWithName(
         NoLockingNecessary,
         [&](auto vectorRef, const char* name) {
-            out.print("    ", name, ": ");
+            out.print("[ MY DEBUG 1 ]    ", name, ": ");
             for (unsigned i = maxNameLength - strlen(name); i--;)
                 out.print(" ");
             out.print(vectorRef, "\n");

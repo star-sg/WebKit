@@ -327,7 +327,16 @@ void MarkedBlock::Handle::specializedSweep(FreeList* freeList, MarkedBlock::Hand
             ++count;
         }
     };
+    
+    if (cellSize == 64 && !strcmp(this->blockFooter().m_subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] sweepMode = %u, SweepToFreeList = %u\n", getpid(), sweepMode, SweepToFreeList);
+    }
     for (size_t i = 0; i < m_endAtom; i += m_atomsPerCell) {
+//        if (cellSize == 64) {
+//            void *p = (char *)&this->block() + i*16;
+//            printf("[ MY DEBUG %d ] Sweeping %p ( cell %lu block %p ) : emptyMode = %u , NotEmpty = %u, marksMode = %u, MarksNotStale = %u, footer.m_marks.get(i) = %d, newlyAllocatedMode = %u, HasNewlyAllocated = %u, footer.m_newlyAllocated.get(i) = %d \n",
+//                   getpid(), p, i, &this->block(), emptyMode, NotEmpty, marksMode, MarksNotStale, footer.m_marks.get(i), newlyAllocatedMode, HasNewlyAllocated, footer.m_newlyAllocated.get(i));
+//        }
         if (emptyMode == NotEmpty
             && ((marksMode == MarksNotStale && footer.m_marks.get(i))
                 || (newlyAllocatedMode == HasNewlyAllocated && footer.m_newlyAllocated.get(i)))) {

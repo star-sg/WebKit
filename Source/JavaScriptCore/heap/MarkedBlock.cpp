@@ -138,22 +138,28 @@ void MarkedBlock::Handle::stopAllocating(const FreeList& freeList)
     
     blockFooter().m_newlyAllocated.clearAll();
     blockFooter().m_newlyAllocatedVersion = heap()->objectSpace().newlyAllocatedVersion();
-
+    
     forEachCell(
         [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
             block().setNewlyAllocated(cell);
             return IterationStatus::Continue;
         });
 
+    int numFree = 0;
     freeList.forEach(
         [&] (HeapCell* cell) {
             if (MarkedBlockInternal::verbose)
                 dataLog("Free cell: ", RawPointer(cell), "\n");
             if (m_attributes.destruction == NeedsDestruction)
                 cell->zap(HeapCell::StopAllocating);
+            numFree ++;
             block().clearNewlyAllocated(cell);
         });
     
+    if (cellSize() == 64 && !strcmp(this->blockFooter().m_subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Stop allocating for block %p: %d free cells\n", getpid(), &this->block(), numFree);
+    }
+   
     m_isFreeListed = false;
 }
 
@@ -192,6 +198,9 @@ void MarkedBlock::Handle::resumeAllocating(FreeList& freeList)
     // Re-create our free list from before stopping allocation. Note that this may return an empty
     // freelist, in which case the block will still be Marked!
     sweep(&freeList);
+    if (cellSize() == 64 && !strcmp(this->blockFooter().m_subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Resume allocating for block %p\n", getpid(), &this->block());
+    }
 }
 
 void MarkedBlock::aboutToMarkSlow(HeapVersion markingVersion)
@@ -203,6 +212,9 @@ void MarkedBlock::aboutToMarkSlow(HeapVersion markingVersion)
         return;
     
     BlockDirectory* directory = handle().directory();
+//    if (directory->cellSize() == 64) {
+//        printf("[ MY DEBUG %d ] about to mark slow on block %p of directory %p\n", getpid(), &this->handle(), directory);
+//    }
 
     if (handle().directory()->isAllocated(Locker { directory->bitvectorLock() }, &handle())
         || !marksConveyLivenessDuringMarking(markingVersion)) {

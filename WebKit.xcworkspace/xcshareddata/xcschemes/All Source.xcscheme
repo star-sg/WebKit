@@ -162,6 +162,13 @@
             ReferencedContainer = "container:Tools/MiniBrowser/MiniBrowser.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <EnvironmentVariables>
+         <EnvironmentVariable
+            key = "WTF_DATA_LOG_FILENAME"
+            value = "/Volumes/ExternalSSD/Projects/webkit/WebKit/webkit.log.1.pid.%pid"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+      </EnvironmentVariables>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

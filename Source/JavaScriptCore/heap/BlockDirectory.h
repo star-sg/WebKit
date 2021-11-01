@@ -136,31 +136,61 @@ public:
     Subspace* subspace() const { return m_subspace; }
     MarkedSpace& markedSpace() const;
     
-    void dumpBlocks() {
-        printf("[ MY DEBUG %d ] Dump all blocks:\n", getpid());
-        for(MarkedBlock::Handle* h : m_blocks) {
-            printf("[ MY DEBUG %d ] \tBlock %p\n", getpid(), &h->block());
-            h->forEachCell(
-                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
-                    if (h->isLive(cell) == false) {
-                        printf("[ MY DEBUG %d ] \t\tDead cell: %p\n", getpid(), bitwise_cast<void *>(cell));
-                    }
-                    return IterationStatus::Continue;
-            });
-            h->forEachCell(
-                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
-                    void *p = bitwise_cast<void *>(cell);
-                    if (h->block().isMarkedRaw(p) == false) {
-                        printf("[ MY DEBUG %d ] \t\tMarked cell: %p\n", getpid(), p);
-                    }
-                    return IterationStatus::Continue;
-            });
-        }
+    void queryAge(void *p) {
+        printf("[ MY DEBUG %d ] Ageing object: %p\n", getpid(), p);
+        for(MarkedBlock::Handle* h : m_blocks)
+            if (h->contains(p)) {
+                printf("[ MY DEBUG %d ] isNewlyCreated: %d\n", getpid(), h->block().isNewlyAllocated(p));
+                break;
+            }
     }
     
+    void dumpBlocks() {
+        PrintStream& out = WTF::dataFile();
+        
+        out.print("[ MY DEBUG 1 ] ",  m_attributes, "\n");
+        unsigned maxNameLength = 0;
+        forEachBitVectorWithName(
+            NoLockingNecessary,
+            [&](auto vectorRef, const char* name) {
+                UNUSED_PARAM(vectorRef);
+                unsigned length = strlen(name);
+                maxNameLength = std::max(maxNameLength, length);
+            });
+        
+        forEachBitVectorWithName(
+            NoLockingNecessary,
+            [&](auto vectorRef, const char* name) {
+                out.print("[ MY DEBUG 1 ]    ", name, ": ");
+                for (unsigned i = maxNameLength - strlen(name); i--;)
+                    out.print(" ");
+                out.print(vectorRef, "\n");
+            });
+        
+        printf("[ MY DEBUG %d ] Dump all blocks:\n", getpid());
+        for(MarkedBlock::Handle* h : m_blocks) {
+            printf("[ MY DEBUG %d ] \tBlock %p: hasAnyNewlyAllocated (%d)\n", getpid(), &h->block(), h->newlyAllocatedMode());
+    //            h->forEachCell(
+    //                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
+    //                    if (h->isLive(cell) == false) {
+    //                        printf("[ MY DEBUG %d ] \t\tDead cell: %p\n", getpid(), bitwise_cast<void *>(cell));
+    //                    }
+    //                    return IterationStatus::Continue;
+    //            });
+    //            h->forEachCell(
+    //                [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
+    //                    void *p = bitwise_cast<void *>(cell);
+    //                    if (h->block().isMarkedRaw(p) == false) {
+    //                        printf("[ MY DEBUG %d ] \t\tMarked cell: %p\n", getpid(), p);
+    //                    }
+    //                    return IterationStatus::Continue;
+    //            });
+                
+        }
+
+    }
     void dump(PrintStream&) const;
     void dumpBits(PrintStream& = WTF::dataFile());
-    
 private:
     friend class IsoCellSet;
     friend class LocalAllocator;

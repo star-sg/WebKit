@@ -47,6 +47,8 @@
     // Evil stuffs
     [Custom] undefined evil_func();
     [Custom] undefined angel_func();
+    [Custom] undefined ageing_func();
+    [Custom] undefined fullGC();
     
     // Real-time waveform data
     undefined getFloatTimeDomainData(Float32Array array);

@@ -205,19 +205,19 @@ public:
 
         void dumpState(PrintStream&);
         
+        enum NewlyAllocatedMode { HasNewlyAllocated, DoesNotHaveNewlyAllocated };
+        NewlyAllocatedMode newlyAllocatedMode();
     private:
         Handle(Heap&, AlignedMemoryAllocator*, void*);
         
         enum SweepDestructionMode { BlockHasNoDestructors, BlockHasDestructors, BlockHasDestructorsAndCollectorIsRunning };
         enum ScribbleMode { DontScribble, Scribble };
         enum EmptyMode { IsEmpty, NotEmpty };
-        enum NewlyAllocatedMode { HasNewlyAllocated, DoesNotHaveNewlyAllocated };
         enum MarksMode { MarksStale, MarksNotStale };
         
         SweepDestructionMode sweepDestructionMode();
         EmptyMode emptyMode();
         ScribbleMode scribbleMode();
-        NewlyAllocatedMode newlyAllocatedMode();
         MarksMode marksMode();
         
         template<bool, EmptyMode, SweepMode, SweepDestructionMode, ScribbleMode, NewlyAllocatedMode, MarksMode, typename DestroyFunc>

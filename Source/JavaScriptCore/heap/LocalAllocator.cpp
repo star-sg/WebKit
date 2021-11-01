@@ -111,6 +111,10 @@ void LocalAllocator::stopAllocatingForGood()
 
 void* LocalAllocator::allocateSlowCase(Heap& heap, GCDeferralContext* deferralContext, AllocationFailureMode failureMode)
 {
+    if (cellSize() == 64 && !strcmp(m_directory->m_subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] ALLOCATE SLOWLY\n", getpid());
+    }
+   
     SuperSamplerScope superSamplerScope(false);
     ASSERT(heap.vm().currentThreadIsHoldingAPILock());
     doTestCollectionsIfNeeded(heap, deferralContext);
@@ -147,6 +151,11 @@ void* LocalAllocator::allocateSlowCase(Heap& heap, GCDeferralContext* deferralCo
         else
             return nullptr;
     }
+    
+    if (cellSize() == 64 && !strcmp(subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Trying to create new block: %p\n", getpid(), &block->block());
+    }
+    
     m_directory->addBlock(block);
     result = allocateIn(block);
     ASSERT(result);

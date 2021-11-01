@@ -376,7 +376,9 @@ bool MarkedSpace::isPagedOut()
 
 void MarkedSpace::freeBlock(MarkedBlock::Handle* block)
 {
-    printf("[ MY DEBUG %d ] Freeing block (%lu) in subspace %s: %p\n", getpid(), block->directory()->cellSize(), block->subspace()->name(), &block->block());
+    if (block->directory()->cellSize() == 64 && !strcmp(block->subspace()->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Freeing block (%lu) in subspace %s: %p\n", getpid(), block->directory()->cellSize(), block->subspace()->name(), &block->block());
+    }
     m_capacity -= MarkedBlock::blockSize;
     m_blocks.remove(&block->block());
     delete block;

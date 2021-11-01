@@ -34,6 +34,7 @@ ALWAYS_INLINE void* LocalAllocator::allocate(Heap& heap, GCDeferralContext* defe
 {
     if constexpr (validateDFGDoesGC)
         heap.verifyCanGC();
+    
     return m_freeList.allocate(
         [&] () -> HeapCell* {
             sanitizeStackForVM(heap.vm());
