@@ -25,13 +25,6 @@ namespace WebCore {
 
 JSC::JSValue JSAnalyserNode::evil_func(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
 
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSHTMLElement* jsHTMLElement = jsCast<JSHTMLElement*>(argument0.value());
-    HTMLElement& element = jsHTMLElement->wrapped();	
-    auto& pluginElement = downcast<HTMLPlugInElement>(element);
-    auto* scriptObject = pluginElement.scriptObjectForPluginReplacement();
-//    void *converted_scriptObject = bitwise_cast<void *>(scriptObject);
-    
     VM& vm = globalObject.vm();
     CompleteSubspace& cellSpace = vm.cellSpace;
     Allocator allocator = cellSpace.allocatorForNonVirtual(64, AllocatorForMode::MustAlreadyHaveAllocator);
@@ -56,44 +49,54 @@ JSC::JSValue JSAnalyserNode::evil_func(JSC::JSGlobalObject& globalObject, JSC::C
     printf("[ MY DEBUG %d ] \tremaining = %u\n", getpid(), fl.m_remaining);
     printf("[ MY DEBUG %d ] \toriginalSize = %u\n", getpid(), fl.m_originalSize);
     bd->dumpBlocks();
-//    printf("[ MY DEBUG %d ] Freed cells:\n", getpid());
-//    fl.forEach(
-//       [&] (HeapCell* cell) {
-//            void *converted_cell = bitwise_cast<void *>(cell);
-//            printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), converted_cell);
-////            if (converted_cell == converted_scriptObject)
-////                printf("[ MY DEBUG %d ] THE ONE IS ALREADY INSIDE FREELIST\n", getpid());
-//       });
-//
+
+    printf("[ MY DEBUG %d ] Freed cells:\n", getpid());
+    fl.forEach(
+       [&] (HeapCell* cell) {
+            void *converted_cell = bitwise_cast<void *>(cell);
+            printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), converted_cell);
+       });
     
     (void)globalObject;
-    (void)scriptObject;
+    (void)callFrame;
     (void)fl;
     return JSC::JSValue();
 }
 
 JSC::JSValue JSAnalyserNode::angel_func(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSHTMLElement* jsHTMLElement = jsCast<JSHTMLElement*>(argument0.value());
-    HTMLElement& element = jsHTMLElement->wrapped();
-    auto& pluginElement = downcast<HTMLPlugInElement>(element);
-    auto* scriptObject = pluginElement.scriptObjectForPluginReplacement();
-    void *converted_scriptObject = bitwise_cast<void *>(scriptObject);
     
-    EnsureStillAliveScope argument1 = callFrame.uncheckedArgument(1);
+    EnsureStillAliveScope argument1 = callFrame.uncheckedArgument(0);
     JSObject* object = jsCast<JSObject*>(argument1.value());
     void *converted_object = bitwise_cast<void *>(object);
     
     printf("[ MY DEBUG %d ] New fake object %p\n", getpid(), converted_object);
+	    
+    (void)globalObject;
+    return JSC::JSValue();
+}
+
+JSC::JSValue JSAnalyserNode::ageing_func(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    EnsureStillAliveScope argument1 = callFrame.uncheckedArgument(0);
+    JSObject* object = jsCast<JSObject*>(argument1.value());
+    void *converted_object = bitwise_cast<void *>(object);
     
-    if (converted_scriptObject == converted_object) {
-        printf("[ MY DEBUG %d ] RECLAIMED SUCCESSFULLY: %p\n", getpid(), converted_object);
-    }
+    VM& vm = globalObject.vm();
+    CompleteSubspace& cellSpace = vm.cellSpace;
+    Allocator allocator = cellSpace.allocatorForNonVirtual(64, AllocatorForMode::MustAlreadyHaveAllocator);
+    LocalAllocator* localAllocator = allocator.localAllocator();
+    BlockDirectory* bd = localAllocator->getBlockDirectory();
+    bd->queryAge(converted_object);
     
     (void)globalObject;
     return JSC::JSValue();
 }
 
+JSC::JSValue JSAnalyserNode::fullGC(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    GCController::singleton().garbageCollectNow();
+    
+    (void)globalObject;
+    (void)callFrame;
+    return JSC::JSValue();
+}
 
 } // namespace WebCore
