@@ -92,6 +92,8 @@ JSC::JSValue JSAnalyserNode::ageing_func(JSC::JSGlobalObject& globalObject, JSC:
 }
 
 JSC::JSValue JSAnalyserNode::fullGC(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    printf("[ MY DEBUG %d ] DUMP ALL OPTION\n", getpid());
+    JSC::Options::dumpAllOptions(stderr, JSC::Options::DumpLevel::Overridden, "Modified JSC runtime options:");
     GCController::singleton().garbageCollectNow();
     
     (void)globalObject;

