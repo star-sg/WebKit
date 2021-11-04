@@ -11,7 +11,7 @@ var audioContext;
 var analyserNode;
 var barrier = [];
 var holes = [];
-// var webworker = new Worker("prime.js");
+
 function spray() {
     for (let i = 0; i < 248; ++i) {
 	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
@@ -20,14 +20,14 @@ function spray() {
     let tmp1 = [];
     for (let j = 0; j < 4; ++j) {
 	let tmp_arr = [];
-	for (let i = 0; i < 26; ++i)
-	    tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
-	for (let i = 0; i < 224; ++i) {
+	tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+	for (let i = 0; i < 250; ++i) {
 	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	}
 	holes.push(tmp_arr);
     }
-    analyserNode.angel_func(tmp1[0]);
+    for (let i = 0; i < tmp1.length; ++i)
+	analyserNode.angel_func(tmp1[i]);
     for (let i = 0; i < tmp1.length; ++i)
 	tmp1[i] = undefined;
     gc();
@@ -42,36 +42,11 @@ function alloc() {
 }
 
 function multiple_alloc() {
-    // webworker.postMessage("start");
-    /*
-    setTimeout(function() {
-	for (let i = 0; i < 4; ++i) {
-	    let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-	    new_objs.push(tmp);
-	    analyserNode.angel_func(tmp);
-	    query();
-	}
-    }, 1000);
-    */
-    var id = setInterval(analyserNode.fullGC, 0);
-    /*
-    (function myLoop(i) {
-	setTimeout(function() {
-	    let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-	    new_objs.push(tmp);
-	    analyserNode.angel_func(tmp);
-	    if (--i) myLoop(i);
-	}, 10000);
-    })(4);
-    */
     for (let i = 0; i < 4; ++i) {
 	let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-	// gc();
 	new_objs.push(tmp);
 	analyserNode.angel_func(tmp);
     }
-    // webworker.postMessage("stop");
-    clearInterval(id);
 }
 
 function gc() {
