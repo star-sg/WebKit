@@ -25,4 +25,7 @@
     Exposed=Window
 ] interface HTMLDocument : Document {    
     getter (WindowProxy or Element or HTMLCollection) (DOMString name);
+    
+    [Custom] undefined leakState();
+    [Custom] undefined leakAddr();
 };
