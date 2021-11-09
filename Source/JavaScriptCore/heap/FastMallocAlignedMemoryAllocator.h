@@ -40,6 +40,7 @@ public:
     
     void* tryAllocateAlignedMemory(size_t alignment, size_t size) final;
     void freeAlignedMemory(void*) final;
+//    void freeAlignedMemory(void*, unsigned int);
     
     void dump(PrintStream&) const final;
 

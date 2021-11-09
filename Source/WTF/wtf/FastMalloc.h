@@ -106,6 +106,7 @@ WTF_EXPORT_PRIVATE void fastFree(void*);
 WTF_EXPORT_PRIVATE void* fastAlignedMalloc(size_t alignment, size_t) RETURNS_NONNULL;
 WTF_EXPORT_PRIVATE void* tryFastAlignedMalloc(size_t alignment, size_t);
 WTF_EXPORT_PRIVATE void fastAlignedFree(void*);
+WTF_EXPORT_PRIVATE void fastAlignedFree(void*, unsigned int);
 
 WTF_EXPORT_PRIVATE size_t fastMallocSize(const void*);
 

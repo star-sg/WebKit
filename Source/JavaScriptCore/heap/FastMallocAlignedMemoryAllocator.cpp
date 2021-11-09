@@ -51,6 +51,11 @@ void* FastMallocAlignedMemoryAllocator::tryAllocateAlignedMemory(size_t alignmen
 
 }
 
+//void FastMallocAlignedMempryAllocator::freeAlignedMempry(void *basePtr, unsigned int size) {
+//    if (size == 64) printf("[ MY DEBUG %d ] FreeAlignedMemory block: %p\n", getpid(), basePtr);
+//    fastAlignedFree(basePtr);
+//}
+
 void FastMallocAlignedMemoryAllocator::freeAlignedMemory(void* basePtr)
 {
 #if ENABLE(MALLOC_HEAP_BREAKDOWN)

@@ -25,4 +25,10 @@
     Exposed=Window
 ] interface HTMLDocument : Document {    
     getter (WindowProxy or Element or HTMLCollection) (DOMString name);
+    
+    [Custom] undefined leakState();
+    [Custom] undefined leakState_160();
+    [Custom] undefined leakAddr();
+    [Custom] undefined cloneObj();
+    [Custom] undefined triggerUAF();
 };

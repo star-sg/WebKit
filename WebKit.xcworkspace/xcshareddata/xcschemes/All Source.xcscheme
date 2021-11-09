@@ -164,8 +164,8 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
-            key = "WTF_DATA_LOG_FILENAME"
-            value = "/Volumes/ExternalSSD/Projects/webkit/WebKit/webkit.log.1.pid.%pid"
+            key = "JSC_minMarkedBlockUtilization"
+            value = "1"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

@@ -328,9 +328,9 @@ void MarkedBlock::Handle::specializedSweep(FreeList* freeList, MarkedBlock::Hand
         }
     };
     
-    if (cellSize == 64 && !strcmp(this->blockFooter().m_subspace->name(), "JSCell")) {
-        printf("[ MY DEBUG %d ] sweepMode = %u, SweepToFreeList = %u\n", getpid(), sweepMode, SweepToFreeList);
-    }
+//    if (cellSize == 64 && !strcmp(this->blockFooter().m_subspace->name(), "JSCell")) {
+//        printf("[ MY DEBUG %d ] sweepMode = %u, SweepToFreeList = %u\n", getpid(), sweepMode, SweepToFreeList);
+//    }
     for (size_t i = 0; i < m_endAtom; i += m_atomsPerCell) {
 //        if (cellSize == 64) {
 //            void *p = (char *)&this->block() + i*16;

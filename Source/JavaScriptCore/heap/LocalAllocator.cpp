@@ -152,8 +152,8 @@ void* LocalAllocator::allocateSlowCase(Heap& heap, GCDeferralContext* deferralCo
             return nullptr;
     }
     
-    if (cellSize() == 64 && !strcmp(subspace->name(), "JSCell")) {
-        printf("[ MY DEBUG %d ] Trying to create new block: %p\n", getpid(), &block->block());
+    if ((cellSize() == 64 || cellSize() == 160) && !strcmp(subspace->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Created new block: %p\n", getpid(), &block->block());
     }
     
     m_directory->addBlock(block);

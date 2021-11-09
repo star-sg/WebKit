@@ -32,6 +32,7 @@ ALWAYS_INLINE void* IsoSubspace::allocateNonVirtual(VM& vm, size_t size, GCDefer
     RELEASE_ASSERT(WTF::roundUpToMultipleOf<MarkedBlock::atomSize>(size) == cellSize());
     Allocator allocator = allocatorForNonVirtual(size, AllocatorForMode::MustAlreadyHaveAllocator);
     void* result = allocator.allocate(vm.heap, deferralContext, failureMode);
+    
     return result;
 }
 

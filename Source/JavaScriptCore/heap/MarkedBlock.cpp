@@ -70,6 +70,9 @@ MarkedBlock::Handle::Handle(Heap& heap, AlignedMemoryAllocator* alignedMemoryAll
 
 MarkedBlock::Handle::~Handle()
 {
+    if (cellSize() == 64 && !strcmp(subspace()->name(), "JSCell")) {
+        printf("[ MY DEBUG %d ] Destructor on handle: %p\n", getpid(), m_block);
+    }
     Heap& heap = *this->heap();
     if (computeBalance) {
         balance--;

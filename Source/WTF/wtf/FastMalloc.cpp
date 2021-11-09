@@ -599,6 +599,11 @@ void* tryFastAlignedMalloc(size_t alignment, size_t size)
     return result;
 }
 
+//void fastAlignedFree(void* p, unsigned int size) {
+//    if (size == 64) printf("[ MY DEBUG %d ] fastAlignedFree block: %p\n", p);
+//    bmalloc::api::free(p, size);
+//}
+
 void fastAlignedFree(void* p)
 {
     bmalloc::api::free(p);
@@ -635,6 +640,7 @@ void releaseFastMallocFreeMemoryForThisThread()
 
 void releaseFastMallocFreeMemory()
 {
+    printf("[ MY DEBUG %d ] RELEASE MEMORY\n", getpid());
     bmalloc::api::scavenge();
 }
 

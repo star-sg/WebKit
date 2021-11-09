@@ -98,6 +98,14 @@ inline void* Cache::allocate(HeapKind heapKind, size_t alignment, size_t size)
     return caches->at(mapToActiveHeapKindAfterEnsuringGigacage(heapKind)).allocator().allocate(alignment, size);
 }
 
+//inline void Cache::deallocate(HeapKind heapKind, void* object, unsigned int size) {
+//    if (size == 64) printf("[ MY DEBUG %d ] cache::deallocate block: %p\n", getpid(), object);
+//    PerHeapKind<Cache>* caches = PerThread<PerHeapKind<Cache>>::getFastCase();
+//    if (!caches)
+//        return deallocateSlowCaseNullCache(heapKind, object, size);
+//    return caches->at(mapToActiveHeapKindAfterEnsuringGigacage(heapKind)).deallocator().deallocate(object, size);
+//}
+
 inline void Cache::deallocate(HeapKind heapKind, void* object)
 {
     PerHeapKind<Cache>* caches = PerThread<PerHeapKind<Cache>>::getFastCase();

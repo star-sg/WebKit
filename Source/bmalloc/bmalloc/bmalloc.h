@@ -141,6 +141,11 @@ BINLINE void* realloc(void* object, size_t newSize, HeapKind kind = HeapKind::Pr
 // uses up virtual address space, not `size` bytes of physical memory.
 BEXPORT void* tryLargeZeroedMemalignVirtual(size_t alignment, size_t size, HeapKind kind = HeapKind::Primary);
 
+//BINLINE void free(void* object, unsigned int size, HeapKind kind = HeapKind::Primary) {
+//    if (size == 64) printf("[ MY DEBUG %d ] free block: %p\n", getpid(), object);
+//    Cache::deallocate(kind, object, size);
+//}
+
 BINLINE void free(void* object, HeapKind kind = HeapKind::Primary)
 {
 #if BUSE(LIBPAS)
