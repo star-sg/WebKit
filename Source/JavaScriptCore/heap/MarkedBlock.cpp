@@ -70,6 +70,7 @@ MarkedBlock::Handle::Handle(Heap& heap, AlignedMemoryAllocator* alignedMemoryAll
 
 MarkedBlock::Handle::~Handle()
 {
+    printf("[ MY DEBUG %d ] Freeing block (%lu): %p\n", getpid(), cellSize(), m_block);
     Heap& heap = *this->heap();
     if (computeBalance) {
         balance--;

@@ -1,10 +1,13 @@
-<body>
+<body onload="start();">
     <embed id="worker" src="data:video/mp4;"></embed>
 <script>
-    window.top.postMessage("Child created", "http://127.0.0.1");
-    worker = document.getElementById("worker");
-    window.addEventListener("DOMNodeRemoved", function() {
-	console.log(worker.GetURL);
-    });
+function start() {
+    var worker = document.getElementById("worker");
+    var intl = setInterval(function() {
+        // worker.GetURL.a = 777;
+        alert(JSON.stringify(worker));
+        clearInterval(intl);
+    }, 1);
+}
 </script>
 </body>

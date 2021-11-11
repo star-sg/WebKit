@@ -26,7 +26,6 @@
 #include "config.h"
 #include "JSHTMLDocument.h"
 
-
 namespace WebCore {
 using namespace JSC;
 
@@ -61,7 +60,7 @@ JSValue JSHTMLDocument::leakState(JSC::JSGlobalObject& globalObject, JSC::CallFr
        });
     
     
-    printf("[ MY DEBUG %d ] QUERY\n", getpid());
+    printf("[ MY DEBUG %d ] QUERY FOR 64\n", getpid());
     printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
     printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
     printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
@@ -80,20 +79,87 @@ JSValue JSHTMLDocument::leakState(JSC::JSGlobalObject& globalObject, JSC::CallFr
     
     (void)globalObject;
     (void)callFrame;
-    (void)fl;
+    return JSC::JSValue();
+}
+
+JSC::JSValue JSHTMLDocument::leakState_160(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    VM& vm = globalObject.vm();
+    CompleteSubspace& cellSpace = vm.cellSpace;
+    Allocator allocator = cellSpace.allocatorForNonVirtual(160, AllocatorForMode::EnsureAllocator);
+    LocalAllocator* localAllocator = allocator.localAllocator();
+    if (localAllocator != nullptr) {
+        FreeList& fl = localAllocator->getFreeList();
+        BlockDirectory* bd = localAllocator->getBlockDirectory();
+        
+        int cnt;
+        fl.forEach(
+           [&] (HeapCell* cell) {
+            cnt ++;
+            (void)cell;
+           });
+        
+        
+        printf("[ MY DEBUG %d ] QUERY FOR 160\n", getpid());
+        printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
+        printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
+        printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
+        printf("[ MY DEBUG %d ] Number of free cells = %d\n", getpid(), cnt);
+        printf("[ MY DEBUG %d ] \tpayloadEnd = %p\n", getpid(), fl.m_payloadEnd);
+        printf("[ MY DEBUG %d ] \tremaining = %u\n", getpid(), fl.m_remaining);
+        printf("[ MY DEBUG %d ] \toriginalSize = %u\n", getpid(), fl.m_originalSize);
+        bd->dumpBlocks();
+
+        printf("[ MY DEBUG %d ] Freed cells:\n", getpid());
+        fl.forEach(
+           [&] (HeapCell* cell) {
+                void *converted_cell = bitwise_cast<void *>(cell);
+                printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), converted_cell);
+           });
+    } else {
+        printf("[ MY DEBUG %d ] CANNOT QUERY FOR 160\n", getpid());
+    }
+    
+    (void)globalObject;
+    (void)callFrame;
     return JSC::JSValue();
 }
 
 JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
     
-    EnsureStillAliveScope argument1 = callFrame.uncheckedArgument(0);
-    JSObject* object = jsCast<JSObject*>(argument1.value());
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSObject *object = jsCast<JSObject*>(argument0.value());
     void *converted_object = bitwise_cast<void *>(object);
     
     printf("[ MY DEBUG %d ] New fake object %p\n", getpid(), converted_object);
-        
+
     (void)globalObject;
     return JSC::JSValue();
+}
+
+JSObject *uaf_obj = nullptr;
+
+JSC::JSValue JSHTMLDocument::cloneObj(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    uaf_obj = jsCast<JSObject*>(argument0.value());
+    
+    (void)globalObject;
+    return JSValue();
+}
+
+JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    
+    VM& vm = globalObject.vm();
+    Identifier ident = Identifier::fromString(vm, "1");
+    PropertyName pn(ident);
+    
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSObject *object = jsCast<JSObject*>(argument0.value());
+    void *converted_object = bitwise_cast<void *>(object);
+    
+    printf("[ MY DEBUG %d ] TRIGGERING ON %p with reclaimed block %p\n", getpid(), uaf_obj, converted_object);
+    
+    (void)callFrame;
+    return uaf_obj->get(&globalObject, pn);
 }
 
 } // namespace WebCore
