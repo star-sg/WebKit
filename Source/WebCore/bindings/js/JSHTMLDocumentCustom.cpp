@@ -25,6 +25,12 @@
 
 #include "config.h"
 #include "JSHTMLDocument.h"
+#include "HTMLPluginElement.h"
+
+#include <wtf/Gigacage.h>
+#include <wtf/PtrTag.h>
+#include <wtf/RawPtrTraits.h>
+
 
 namespace WebCore {
 using namespace JSC;
@@ -136,30 +142,71 @@ JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::Ca
     return JSC::JSValue();
 }
 
+JSC::JSValue JSHTMLDocument::leakScriptObject(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSHTMLElement *object = jsCast<JSHTMLElement*>(argument0.value());
+    
+    HTMLElement& element = object->wrapped();
+    auto& pluginElement = downcast<HTMLPlugInElement>(element);
+    JSObject* scriptObject = pluginElement.scriptObjectForPluginReplacement();
+    
+    
+    printf("[ MY DEBUG %d ] m_scriptObject = %p\n", getpid(), scriptObject);
+    VM& vm = globalObject.vm();
+    Identifier ident = Identifier::fromString(vm, "a");
+    PropertyName pn(ident);
+
+    return scriptObject->get(&globalObject, pn);
+
+//    (void)globalObject;
+//    return JSC::JSValue();
+}
+
+
 JSObject *uaf_obj = nullptr;
 
 JSC::JSValue JSHTMLDocument::cloneObj(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
     EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
     uaf_obj = jsCast<JSObject*>(argument0.value());
-    
+
     (void)globalObject;
     return JSValue();
 }
 
+//JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+//
+//    VM& vm = globalObject.vm();
+//    Identifier ident = Identifier::fromString(vm, "1");
+//    PropertyName pn(ident);
+//
+//    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+//    JSObject *object = jsCast<JSObject*>(argument0.value());
+//    void *converted_object = bitwise_cast<void *>(object);
+//
+//    printf("[ MY DEBUG %d ] TRIGGERING ON %p with reclaimed block %p\n", getpid(), uaf_obj, converted_object);
+//
+//    (void)callFrame;
+//    return uaf_obj->get(&globalObject, pn);
+//}
+
+using Mytype = CagedBarrierPtr<Gigacage::Primitive, void, tagCagedPtr>;
 JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    
-    VM& vm = globalObject.vm();
-    Identifier ident = Identifier::fromString(vm, "1");
-    PropertyName pn(ident);
-    
+
     EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
     JSObject *object = jsCast<JSObject*>(argument0.value());
-    void *converted_object = bitwise_cast<void *>(object);
+    JSC::JSArrayBufferView *converted_object = bitwise_cast<JSC::JSArrayBufferView *>(object);
     
-    printf("[ MY DEBUG %d ] TRIGGERING ON %p with reclaimed block %p\n", getpid(), uaf_obj, converted_object);
+    void *vector = converted_object->vector();
+    void *cagedPtr = Gigacage::caged(Gigacage::Primitive, vector);
     
-    (void)callFrame;
-    return uaf_obj->get(&globalObject, pn);
+    printf("[ MY DEBUG %d ] Vector: %p\n", getpid(), vector);
+    printf("[ MY DEBUG %d ] Caged ptr: %p\n", getpid(), cagedPtr);
+    
+    
+    
+    (void)globalObject;
+    return JSC::JSValue();
 }
 
 } // namespace WebCore

@@ -178,6 +178,7 @@ BINLINE T* caged(Kind kind, T* ptr)
     if (!isEnabled(kind))
         return ptr;
     void* gigacageBasePtr = basePtr(kind);
+    printf("[ MY DEBUG %d ] mask = %lu\n", getpid(), mask(kind));
     return reinterpret_cast<T*>(
         reinterpret_cast<uintptr_t>(gigacageBasePtr) + (
             reinterpret_cast<uintptr_t>(ptr) & mask(kind)));

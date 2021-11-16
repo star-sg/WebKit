@@ -31,4 +31,5 @@
     [Custom] undefined leakAddr();
     [Custom] undefined cloneObj();
     [Custom] undefined triggerUAF();
+    [Custom] undefined leakScriptObject();
 };
