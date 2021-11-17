@@ -193,18 +193,20 @@ JSC::JSValue JSHTMLDocument::cloneObj(JSC::JSGlobalObject& globalObject, JSC::Ca
 using Mytype = CagedBarrierPtr<Gigacage::Primitive, void, tagCagedPtr>;
 JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
 
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSObject *object = jsCast<JSObject*>(argument0.value());
-    JSC::JSArrayBufferView *converted_object = bitwise_cast<JSC::JSArrayBufferView *>(object);
+//    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+//    JSObject *object = jsCast<JSObject*>(argument0.value());
+//    JSC::JSArrayBufferView *converted_object = bitwise_cast<JSC::JSArrayBufferView *>(object);
+//
+//    void *vector = converted_object->vector();
+//    void *cagedPtr = Gigacage::caged(Gigacage::Primitive, vector);
+//
+//    printf("[ MY DEBUG %d ] Vector: %p\n", getpid(), vector);
+//    printf("[ MY DEBUG %d ] Caged ptr: %p\n", getpid(), cagedPtr);
+//
     
-    void *vector = converted_object->vector();
-    void *cagedPtr = Gigacage::caged(Gigacage::Primitive, vector);
+    printf("[ MY DEBUG %d ] ArrayType: %u\n", getpid(), JSC::JSType::ArrayType);
     
-    printf("[ MY DEBUG %d ] Vector: %p\n", getpid(), vector);
-    printf("[ MY DEBUG %d ] Caged ptr: %p\n", getpid(), cagedPtr);
-    
-    
-    
+    (void)callFrame;
     (void)globalObject;
     return JSC::JSValue();
 }
