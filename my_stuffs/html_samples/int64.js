@@ -114,6 +114,26 @@ class Int64 {
     }
     sub(v) { return Int64.sub(this, v); }
 
+    _and_inplace(high, low) {
+        this.high &= high;
+        this.low  &= low;
+        return this;
+    }
+    and_inplace(v) {
+        if (v instanceof Int64)
+            return this._and_inplace(v.high, v.low);
+        return Int64._parse_arg(v, (h, l) => {
+            return this._and_inplace(h, l);
+        });
+    }
+    and(v) { return Int64.and(this, v); }
+
+    shift_left_inplace(b) {
+        this.low <<= b;
+        this.high = (this.high << b) | (this.low >> (32 - b));
+        return this;
+    }
+
     to_double() { return Binary.i64_to_f64(this); }
     as_double() { return this.to_double(); }
 
@@ -210,6 +230,23 @@ Int64.sub = (a,b) => {
     return Int64._parse_arg(b, (h, l) => {
         return res._sub_inplace(h, l);
     });
+}
+
+Int64.and = (a,b) => {
+    let res = new Int64(a);
+
+    if (b instanceof Int64)
+        return res._and_inplace(b.high, b.low);
+    return Int64._parse_arg(b, (h, l) => {
+        return res._and_inplace(h, l);
+    });
+}
+
+Int64.shiftLeft = (a, b) => {
+    let res = new Int64(a);
+    if (b instanceof Int64)
+        throw ("Too large shift bits");
+    return res.shift_left_inplace(b);
 }
 
 // Return an integer encoded as a V8 SMI
