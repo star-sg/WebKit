@@ -25,12 +25,6 @@
 
 #include "config.h"
 #include "JSHTMLDocument.h"
-#include "HTMLPluginElement.h"
-
-#include <wtf/Gigacage.h>
-#include <wtf/PtrTag.h>
-#include <wtf/RawPtrTraits.h>
-
 
 namespace WebCore {
 using namespace JSC;
@@ -50,48 +44,23 @@ JSValue toJS(JSGlobalObject* lexicalGlobalObject, JSDOMGlobalObject* globalObjec
     return toJSNewlyCreated(lexicalGlobalObject, globalObject, Ref<HTMLDocument>(document));
 }
 
-JSValue JSHTMLDocument::leakState(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    VM& vm = globalObject.vm();
-    CompleteSubspace& cellSpace = vm.cellSpace;
-    Allocator allocator = cellSpace.allocatorForNonVirtual(64, AllocatorForMode::MustAlreadyHaveAllocator);
-    LocalAllocator* localAllocator = allocator.localAllocator();
-    FreeList& fl = localAllocator->getFreeList();
-    BlockDirectory* bd = localAllocator->getBlockDirectory();
+JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
     
-    int cnt;
-    fl.forEach(
-       [&] (HeapCell* cell) {
-        cnt ++;
-        (void)cell;
-       });
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSObject *object = jsCast<JSObject*>(argument0.value());
+    void *converted_object = bitwise_cast<void *>(object);
     
-    
-    printf("[ MY DEBUG %d ] QUERY FOR 64\n", getpid());
-    printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
-    printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
-    printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
-    printf("[ MY DEBUG %d ] Number of free cells = %d\n", getpid(), cnt);
-    printf("[ MY DEBUG %d ] \tpayloadEnd = %p\n", getpid(), fl.m_payloadEnd);
-    printf("[ MY DEBUG %d ] \tremaining = %u\n", getpid(), fl.m_remaining);
-    printf("[ MY DEBUG %d ] \toriginalSize = %u\n", getpid(), fl.m_originalSize);
-    bd->dumpBlocks();
+    printf("[ MY DEBUG %d ] Object was located in  %p\n", getpid(), converted_object);
 
-    printf("[ MY DEBUG %d ] Freed cells:\n", getpid());
-    fl.forEach(
-       [&] (HeapCell* cell) {
-            void *converted_cell = bitwise_cast<void *>(cell);
-            printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), converted_cell);
-       });
-    
     (void)globalObject;
-    (void)callFrame;
     return JSC::JSValue();
 }
 
-JSC::JSValue JSHTMLDocument::leakState_160(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+JSC::JSValue JSHTMLDocument::leakAllocator(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    unsigned int size = convert<IDLUnsignedLong>(globalObject, callFrame.uncheckedArgument(0));
     VM& vm = globalObject.vm();
     CompleteSubspace& cellSpace = vm.cellSpace;
-    Allocator allocator = cellSpace.allocatorForNonVirtual(160, AllocatorForMode::EnsureAllocator);
+    Allocator allocator = cellSpace.allocatorForNonVirtual(size, AllocatorForMode::EnsureAllocator);
     LocalAllocator* localAllocator = allocator.localAllocator();
     if (localAllocator != nullptr) {
         FreeList& fl = localAllocator->getFreeList();
@@ -105,7 +74,7 @@ JSC::JSValue JSHTMLDocument::leakState_160(JSC::JSGlobalObject& globalObject, JS
            });
         
         
-        printf("[ MY DEBUG %d ] QUERY FOR 160\n", getpid());
+        printf("[ MY DEBUG %d ] QUERY FOR %u\n", getpid(), size);
         printf("[ MY DEBUG %d ] Current block on allocator: %p\n", getpid(), localAllocator->getCurrentBlock());
         printf("[ MY DEBUG %d ] Last active block on allocator: %p\n", getpid(), localAllocator->getLastActiveBlock());
         printf("[ MY DEBUG %d ] FreeList of Allocator (%p) in cellSpace\n", getpid(), localAllocator);
@@ -122,93 +91,11 @@ JSC::JSValue JSHTMLDocument::leakState_160(JSC::JSGlobalObject& globalObject, JS
                 printf("[ MY DEBUG %d ] \tCell: %p\n", getpid(), converted_cell);
            });
     } else {
-        printf("[ MY DEBUG %d ] CANNOT QUERY FOR 160\n", getpid());
+        printf("[ MY DEBUG %d ] CANNOT QUERY FOR %u\n", getpid(), size);
     }
     
-    (void)globalObject;
-    (void)callFrame;
-    return JSC::JSValue();
+    return JSC::JSValue();  
 }
 
-JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSObject *object = jsCast<JSObject*>(argument0.value());
-    void *converted_object = bitwise_cast<void *>(object);
-    
-    printf("[ MY DEBUG %d ] New fake object %p\n", getpid(), converted_object);
-
-    (void)globalObject;
-    return JSC::JSValue();
-}
-
-JSC::JSValue JSHTMLDocument::leakScriptObject(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSHTMLElement *object = jsCast<JSHTMLElement*>(argument0.value());
-    
-    HTMLElement& element = object->wrapped();
-    auto& pluginElement = downcast<HTMLPlugInElement>(element);
-    JSObject* scriptObject = pluginElement.scriptObjectForPluginReplacement();
-    
-    
-    printf("[ MY DEBUG %d ] m_scriptObject = %p\n", getpid(), scriptObject);
-    VM& vm = globalObject.vm();
-    Identifier ident = Identifier::fromString(vm, "a");
-    PropertyName pn(ident);
-
-    return scriptObject->get(&globalObject, pn);
-
-//    (void)globalObject;
-//    return JSC::JSValue();
-}
-
-
-JSObject *uaf_obj = nullptr;
-
-JSC::JSValue JSHTMLDocument::cloneObj(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    uaf_obj = jsCast<JSObject*>(argument0.value());
-
-    (void)globalObject;
-    return JSValue();
-}
-
-//JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-//
-//    VM& vm = globalObject.vm();
-//    Identifier ident = Identifier::fromString(vm, "1");
-//    PropertyName pn(ident);
-//
-//    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-//    JSObject *object = jsCast<JSObject*>(argument0.value());
-//    void *converted_object = bitwise_cast<void *>(object);
-//
-//    printf("[ MY DEBUG %d ] TRIGGERING ON %p with reclaimed block %p\n", getpid(), uaf_obj, converted_object);
-//
-//    (void)callFrame;
-//    return uaf_obj->get(&globalObject, pn);
-//}
-
-using Mytype = CagedBarrierPtr<Gigacage::Primitive, void, tagCagedPtr>;
-JSC::JSValue JSHTMLDocument::triggerUAF(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-
-//    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-//    JSObject *object = jsCast<JSObject*>(argument0.value());
-//    JSC::JSArrayBufferView *converted_object = bitwise_cast<JSC::JSArrayBufferView *>(object);
-//
-//    void *vector = converted_object->vector();
-//    void *cagedPtr = Gigacage::caged(Gigacage::Primitive, vector);
-//
-//    printf("[ MY DEBUG %d ] Vector: %p\n", getpid(), vector);
-//    printf("[ MY DEBUG %d ] Caged ptr: %p\n", getpid(), cagedPtr);
-//
-    
-    printf("[ MY DEBUG %d ] ArrayType: %u\n", getpid(), JSC::JSType::ArrayType);
-    
-    (void)callFrame;
-    (void)globalObject;
-    return JSC::JSValue();
-}
 
 } // namespace WebCore

@@ -43,10 +43,6 @@
     // If the array has fewer elements than the frequencyBinCount, the excess elements will be dropped.
     undefined getFloatFrequencyData(Float32Array array);
     undefined getByteFrequencyData(Uint8Array array);
-    
-    // Evil stuffs
-    [Custom] undefined evil_func();
-    [Custom] undefined angel_func();
 
     // Real-time waveform data
     [EnabledBySetting=ModernUnprefixedWebAudio] undefined getFloatTimeDomainData(Float32Array array);
