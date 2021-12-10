@@ -50,7 +50,7 @@ JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::Ca
     JSObject *object = jsCast<JSObject*>(argument0.value());
     void *converted_object = bitwise_cast<void *>(object);
     
-    printf("[ MY DEBUG %d ] Object was located in  %p\n", getpid(), converted_object);
+    printf("[ MY DEBUG %d ] Object was located in %p\n", getpid(), converted_object);
 
     (void)globalObject;
     return JSC::JSValue();
