@@ -45,7 +45,6 @@ JSValue toJS(JSGlobalObject* lexicalGlobalObject, JSDOMGlobalObject* globalObjec
 }
 
 JSC::JSValue JSHTMLDocument::leakAddr(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
-    
     EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
     JSObject *object = jsCast<JSObject*>(argument0.value());
     void *converted_object = bitwise_cast<void *>(object);
@@ -95,6 +94,14 @@ JSC::JSValue JSHTMLDocument::leakAllocator(JSC::JSGlobalObject& globalObject, JS
     }
     
     return JSC::JSValue();  
+}
+
+JSC::JSValue JSHTMLDocument::localVar(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    
+    (void)globalObject;
+    (void)callFrame;
+    
+    return JSC::JSValue();
 }
 
 

@@ -168,6 +168,7 @@ bool QuickTimePluginReplacement::ensureReplacementScriptInjected()
 
 bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
 {
+    printf("[ MY DEBUG %d ] INSTALL REPLACEMENT\n", getpid());
     if (!ensureReplacementScriptInjected())
         return false;
 
@@ -199,6 +200,8 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
     argList.append(toJS<IDLSequence<IDLNullable<IDLDOMString>>>(*lexicalGlobalObject, *globalObject, m_names));
     argList.append(toJS<IDLSequence<IDLNullable<IDLDOMString>>>(*lexicalGlobalObject, *globalObject, m_values));
     ASSERT(!argList.hasOverflowed());
+    
+    printf("[ MY DEBUG %d ] CREATING OBJECT\n", getpid());
     JSC::JSValue replacement = call(lexicalGlobalObject, replacementObject, callData, globalObject, argList);
     if (UNLIKELY(scope.exception())) {
         scope.clearException();
@@ -206,6 +209,7 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
     }
 
     // Get the <video> created to replace the plug-in.
+    printf("[ MY DEBUG %d ] GETTING VIDEO\n", getpid());
     JSC::JSValue value = replacement.get(lexicalGlobalObject, JSC::Identifier::fromString(vm, "video"));
     if (!scope.exception() && !value.isUndefinedOrNull())
         m_mediaElement = JSHTMLVideoElement::toWrapped(vm, value);
@@ -222,7 +226,7 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
     value = replacement.get(lexicalGlobalObject, JSC::Identifier::fromString(vm, "scriptObject"));
     if (!scope.exception() && !value.isUndefinedOrNull()) {
         m_scriptObject = value.toObject(lexicalGlobalObject);
-        printf("[ MY DEBUG %d ] this = %p\n", getpid(), this);
+        printf("[ MY DEBUG %d ] replacement = %p\n", getpid(), replacement.toObject(lexicalGlobalObject));
         printf("[ MY DEBUG %d ] m_scriptObject = %p\n", getpid(), m_scriptObject);
         scope.assertNoException();
     }
@@ -233,6 +237,7 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
         return false;
     }
 
+    printf("[ MY DEBUG %d ] DONE INSTALLLING\n", getpid());
     return true;
 }
 

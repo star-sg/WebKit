@@ -579,7 +579,7 @@ VM::VM(VMType vmType, HeapType heapType, WTF::RunLoop* runLoop, bool* success)
     if (!g_jscConfig.disabledFreezingForTesting)
         Config::permanentlyFreeze();
     
-    printf("[ MY DEBUG %d ] New VM was created at %p\n", getpid(), this);
+//    printf("[ MY DEBUG %d ] New VM was created at %p\n", getpid(), this);
     
 }
 
@@ -592,7 +592,7 @@ void waitForVMDestruction()
 
 VM::~VM()
 {
-    printf("[ MY DEBUG %d ] VM at %p is gonna destroyed\n", getpid(), this);
+//    printf("[ MY DEBUG %d ] VM at %p is gonna destroyed\n", getpid(), this);
     auto destructionLocker = holdLock(s_destructionLock.read());
     
     Gigacage::removePrimitiveDisableCallback(primitiveGigacageDisabledCallback, this);

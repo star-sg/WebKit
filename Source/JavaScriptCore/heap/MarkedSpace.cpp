@@ -375,7 +375,7 @@ bool MarkedSpace::isPagedOut(MonotonicTime deadline)
 
 void MarkedSpace::freeBlock(MarkedBlock::Handle* block)
 {
-    printf("[ MY DEBUG %d ] Freeing block (%lu) in subspace %s: %p\n", getpid(), block->directory()->cellSize(), block->subspace()->name(), &block->block());
+//    printf("[ MY DEBUG %d ] Freeing block (%lu) in subspace %s: %p\n", getpid(), block->directory()->cellSize(), block->subspace()->name(), &block->block());
     block->directory()->removeBlock(block);
     m_capacity -= MarkedBlock::blockSize;
     m_blocks.remove(&block->block());

@@ -1,12 +1,12 @@
-<head>
-<script src="tmp.js">
-</script>
-</head>
-
 <body>
 <script>
-    var obj = {a:1, b:2, c:3};
-    F(function() {}, obj);
+function F() {
+    var obj = {a: 1, b: 2, c: 3, d: 4};
+    document.leakAddr(obj);
+    document.scanLocalVariable();
+}
+
+F();
 </script>
 <body>
 
