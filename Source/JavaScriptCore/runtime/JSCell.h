@@ -138,7 +138,7 @@ public:
 
     TypeInfo::InlineTypeFlags inlineTypeFlags() const { return m_flags; }
     
-    const char* className(VM&) const;
+    JS_EXPORT_PRIVATE const char* className(VM&) const;
 
     // Extracting the value.
     JS_EXPORT_PRIVATE bool getString(JSGlobalObject*, String&) const;

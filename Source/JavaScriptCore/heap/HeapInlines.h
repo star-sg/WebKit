@@ -107,7 +107,8 @@ inline void Heap::writeBarrier(const JSCell* from, JSCell* to)
 #if ENABLE(WRITE_BARRIER_PROFILING)
     WriteBarrierCounters::countWriteBarrier();
 #endif
-//    printf("[ MY DEBUG %d ] Writing barrier from %p to %p\n", getpid(), from, to);
+    if (to != nullptr && !strcmp(to->subspace()->name(), "JSCell"))
+    printf("[ MY DEBUG %d ] Writing barrier from %p (%s) to %p (%s)\n", getpid(), from, from->className(from->vm()), to, to->className(to->vm()));
     if (!from)
         return;
     if (!isWithinThreshold(from->cellState(), barrierThreshold()))

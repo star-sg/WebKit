@@ -96,7 +96,20 @@ JSC::JSValue JSHTMLDocument::leakAllocator(JSC::JSGlobalObject& globalObject, JS
     return JSC::JSValue();  
 }
 
-JSC::JSValue JSHTMLDocument::localVar(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+JSC::JSValue JSHTMLDocument::visit(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    
+//    HTMLDocument& object = this->wrapped();
+//    Vector<TreeScope, 5> treeScopes;
+//    
+//    Element* node = static_cast<Element*>(&object);
+//    
+//    while (true) {
+//        treeScopes.append(node->treeScope());
+//        Element* ancestor = node->shadowHost();
+//        if (!ancestor)
+//            break;
+//        node = ancestor;
+//    }
     
     (void)globalObject;
     (void)callFrame;

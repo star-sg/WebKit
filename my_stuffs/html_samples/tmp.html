@@ -1,9 +1,12 @@
 <body>
 <script>
 function F() {
-    var obj = {a: 1, b: 2, c: 3, d: 4};
+    let obj = {a: 1, b: 2, c: 3, d: 4};
+    let obj2 = {}
     document.leakAddr(obj);
-    document.scanLocalVariable();
+    document.leakAddr(obj2);
+    obj["e"] = obj2;
+    document.visit(obj);
 }
 
 F();

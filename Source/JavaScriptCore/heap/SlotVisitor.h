@@ -203,7 +203,7 @@ private:
     
     void noteLiveAuxiliaryCell(HeapCell*);
     
-    void visitChildren(const JSCell*);
+    JS_EXPORT_PRIVATE void visitChildren(const JSCell*);
 
     void propagateExternalMemoryVisitedIfNecessary();
     

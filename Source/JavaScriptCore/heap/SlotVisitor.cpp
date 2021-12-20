@@ -344,14 +344,14 @@ private:
     SlotVisitor& m_visitor;
 };
 
-ALWAYS_INLINE void SlotVisitor::visitChildren(const JSCell* cell)
+void SlotVisitor::visitChildren(const JSCell* cell)
 {
     ASSERT(m_heap.isMarked(cell));
     
     SetCurrentCellScope currentCellScope(*this, cell);
     
     if (false) {
-        dataLog("Visiting ", RawPointer(cell));
+        dataLog("[ MY DEBUG 1 ] Visiting ", RawPointer(cell));
         if (!m_isFirstVisit)
             dataLog(" (subsequent)");
         dataLog("\n");

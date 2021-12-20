@@ -3111,4 +3111,9 @@ void Heap::verifyGC()
     m_verifierSlotVisitor = nullptr;
 }
 
+void Heap::visitChildren(JSCell *cell) {
+    SlotVisitor& visitor = *m_collectorSlotVisitor;
+    visitor.visitChildren(const_cast<JSCell*>(cell));
+}
+
 } // namespace JSC

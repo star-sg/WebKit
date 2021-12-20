@@ -28,5 +28,5 @@
     
     [Custom] undefined leakAddr();
     [Custom] undefined leakAllocator();
-    [Custom] undefined localVar();
+    [Custom] undefined visit();
 };

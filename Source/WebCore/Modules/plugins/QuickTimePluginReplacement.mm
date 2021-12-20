@@ -219,6 +219,8 @@ bool QuickTimePluginReplacement::installReplacement(ShadowRoot& root)
         scope.clearException();
         return false;
     }
+    
+    printf("[ MY DEBUG %d ] m_mediaElement = %p\n", getpid(), value.toObject(lexicalGlobalObject));
 
     printf("[ MY DEBUG %d ] QuickTimePluginReplacement = %p\n", getpid(), this);
     

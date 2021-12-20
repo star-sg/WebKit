@@ -406,6 +406,7 @@ public:
 
     bool isMarkingForGCVerifier() const { return m_isMarkingForGCVerifier; }
 
+    JS_EXPORT_PRIVATE void visitChildren(JSCell *cell);
 private:
     friend class AllocatingScope;
     friend class CodeBlock;
