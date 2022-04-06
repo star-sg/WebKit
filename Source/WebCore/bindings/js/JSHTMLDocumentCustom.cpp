@@ -25,7 +25,9 @@
 
 #include "config.h"
 #include "JSHTMLDocument.h"
-
+#include "JSWebGLBuffer.h"
+#include "JSWebGLRenderingContext.h"
+#include "WebGLRenderingContextBase.h"
 
 namespace WebCore {
 using namespace JSC;
@@ -43,6 +45,35 @@ JSValue toJS(JSGlobalObject* lexicalGlobalObject, JSDOMGlobalObject* globalObjec
     if (auto* wrapper = cachedDocumentWrapper(*lexicalGlobalObject, *globalObject, document))
         return wrapper;
     return toJSNewlyCreated(lexicalGlobalObject, globalObject, Ref<HTMLDocument>(document));
+}
+
+JSC::JSValue JSHTMLDocument::dumpWebGLBuffer(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSWebGLBuffer *object = jsCast<JSWebGLBuffer*>(argument0.value());
+    void *converted_object = bitwise_cast<void *>(object);
+    
+    printf("[ MY DEBUG ] Object was located in %p\n", converted_object);
+    
+    void *converted_raw = bitwise_cast<void *>(JSWebGLBuffer::toWrapped(globalObject.vm(), object));
+    printf("[ MY DEBUG ] -> Raw = %p\n", converted_raw);
+
+//    (void)globalObject;
+    return JSC::JSValue();
+}
+
+JSC::JSValue JSHTMLDocument::dumpBufferBinding(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
+    JSWebGLRenderingContext *object = jsCast<JSWebGLRenderingContext*>(argument0.value());
+    WebGLRenderingContext* ctx = JSWebGLRenderingContext::toWrapped(globalObject.vm(), object);
+    
+    auto raw_ctx = ctx->graphicsContextGL();
+//    auto state = raw_ctx->getState();
+//    void *converted_raw = bitwise_cast<void *>(JSWebGLBuffer::toWrapped(globalObject.vm(), object));
+//    printf("[ MY DEBUG ] -> Raw = %p\n", converted_raw);
+
+//    (void)globalObject;
+    (void)raw_ctx;
+    return JSC::JSValue();
 }
 
 } // namespace WebCore
