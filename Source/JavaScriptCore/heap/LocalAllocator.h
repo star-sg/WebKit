@@ -57,6 +57,9 @@ public:
     
     bool isFreeListedCell(const void*) const;
     
+    FreeList& getFreeList() { return m_freeList; }
+    BlockDirectory* getBlockDirectory() { return m_directory; }
+    
 private:
     friend class BlockDirectory;
     

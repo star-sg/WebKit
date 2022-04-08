@@ -61,18 +61,58 @@ JSC::JSValue JSHTMLDocument::dumpWebGLBuffer(JSC::JSGlobalObject& globalObject, 
     return JSC::JSValue();
 }
 
-JSC::JSValue JSHTMLDocument::dumpBufferBinding(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+JSC::JSValue JSHTMLDocument::dumpArray(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
     EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSWebGLRenderingContext *object = jsCast<JSWebGLRenderingContext*>(argument0.value());
-    WebGLRenderingContext* ctx = JSWebGLRenderingContext::toWrapped(globalObject.vm(), object);
+    JSInt32Array *object = jsCast<JSInt32Array*>(argument0.value());
     
-    auto raw_ctx = ctx->graphicsContextGL();
-//    auto state = raw_ctx->getState();
-//    void *converted_raw = bitwise_cast<void *>(JSWebGLBuffer::toWrapped(globalObject.vm(), object));
-//    printf("[ MY DEBUG ] -> Raw = %p\n", converted_raw);
+    auto& vm = globalObject.vm();
+    auto* subspace = JSC::subspaceFor<JSInt32Array>(vm);
+    void *converted_raw = bitwise_cast<void *>(object);
+    printf("[ MY DEBUG ] Array = %p\n", converted_raw);
 
 //    (void)globalObject;
-    (void)raw_ctx;
+    (void)subspace;
+    (void)vm;
+    return JSC::JSValue();
+}
+
+JSC::JSValue JSHTMLDocument::dumpHeap(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
+    unsigned int size = convert<IDLUnsignedLong>(globalObject, callFrame.uncheckedArgument(0));
+    VM& vm = globalObject.vm();
+    CompleteSubspace& space = vm.primitiveGigacageAuxiliarySpace();
+    Allocator allocator = space.allocatorFor(size, AllocatorForMode::EnsureAllocator);
+    LocalAllocator* localAllocator = allocator.localAllocator();
+    if (localAllocator != nullptr) {
+        FreeList& fl = localAllocator->getFreeList();
+        BlockDirectory* bd = localAllocator->getBlockDirectory();
+
+        int cnt;
+        fl.forEach(
+           [&] (HeapCell* cell) {
+            cnt ++;
+            (void)cell;
+           });
+
+
+        printf("[ MY DEBUG ] QUERY FOR %u\n", size);
+        printf("[ MY DEBUG ] FreeList of Allocator (%p) in cellSpace\n", localAllocator);
+        printf("[ MY DEBUG ] Number of free cells = %d\n", cnt);
+        printf("[ MY DEBUG ] \tpayloadEnd = %p\n", fl.m_payloadEnd);
+        printf("[ MY DEBUG ] \tremaining = %u\n", fl.m_remaining);
+        printf("[ MY DEBUG ] \toriginalSize = %u\n", fl.m_originalSize);
+        bd->dumpBlocks();
+
+        printf("[ MY DEBUG ] Freed cells:\n");
+        fl.forEach(
+           [&] (HeapCell* cell) {
+                void *converted_cell = bitwise_cast<void *>(cell);
+                printf("[ MY DEBUG ] \tCell: %p\n", converted_cell);
+           });
+    } else {
+        printf("[ MY DEBUG ] CANNOT QUERY FOR %u\n", size);
+    }
+    (void)size;
+    (void)space;
     return JSC::JSValue();
 }
 

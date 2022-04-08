@@ -139,6 +139,42 @@ public:
     void dump(PrintStream&) const;
     void dumpBits(PrintStream& = WTF::dataFile());
     
+    void dumpBlocks() {
+       PrintStream& out = WTF::dataFile();
+               
+       out.print("[ MY DEBUG ] ",  m_attributes, "\n");
+       unsigned maxNameLength = 0;
+       forEachBitVectorWithName(
+           NoLockingNecessary,
+           [&](auto vectorRef, const char* name) {
+               UNUSED_PARAM(vectorRef);
+               unsigned length = strlen(name);
+               maxNameLength = std::max(maxNameLength, length);
+           });
+       
+       forEachBitVectorWithName(
+           NoLockingNecessary,
+           [&](auto vectorRef, const char* name) {
+               out.print("[ MY DEBUG ]    ", name, ": ");
+               for (unsigned i = maxNameLength - strlen(name); i--;)
+                   out.print(" ");
+               out.print(vectorRef, "\n");
+           });
+       
+       printf("[ MY DEBUG ] Dump all blocks:\n");
+       for(MarkedBlock::Handle* h : m_blocks) {
+           printf("[ MY DEBUG ] \tBlock %p\n", &h->block());
+           h->forEachCell(
+               [&] (size_t, HeapCell* cell, HeapCell::Kind) -> IterationStatus {
+                   void *p = bitwise_cast<void *>(cell);
+                   if (h->block().isMarkedRaw(p) == false) {
+                       printf("[ MY DEBUG ] \t\tNot marked cell: %p\n", p);
+                   }
+                   return IterationStatus::Continue;
+           });
+       }
+   }
+    
 private:
     friend class IsoCellSet;
     friend class LocalAllocator;

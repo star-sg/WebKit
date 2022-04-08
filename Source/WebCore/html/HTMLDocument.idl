@@ -27,5 +27,6 @@
     getter (WindowProxy or Element or HTMLCollection) (DOMString name);
     
     [Custom] undefined dumpWebGLBuffer();
-    [Custom] undefined dumpBufferBinding();
+    [Custom] undefined dumpArray();
+    [Custom] undefined dumpHeap();
 };

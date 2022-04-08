@@ -93,7 +93,7 @@ public:
 
     unsigned cellSize() const { return m_cellSize; }
     
-private:
+//private:
     FreeCell* head() const { return FreeCell::descramble(m_scrambledHead, m_secret); }
     
     uintptr_t m_scrambledHead { 0 };
