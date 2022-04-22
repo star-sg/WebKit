@@ -102,12 +102,14 @@ JSC::JSValue JSHTMLDocument::dumpHeap(JSC::JSGlobalObject& globalObject, JSC::Ca
         printf("[ MY DEBUG ] \toriginalSize = %u\n", fl.m_originalSize);
         bd->dumpBlocks();
 
+        /*
         printf("[ MY DEBUG ] Freed cells:\n");
         fl.forEach(
            [&] (HeapCell* cell) {
                 void *converted_cell = bitwise_cast<void *>(cell);
                 printf("[ MY DEBUG ] \tCell: %p\n", converted_cell);
            });
+        */
     } else {
         printf("[ MY DEBUG ] CANNOT QUERY FOR %u\n", size);
     }

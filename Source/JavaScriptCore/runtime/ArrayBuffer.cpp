@@ -123,6 +123,7 @@ void ArrayBufferContents::tryAllocate(size_t numElements, unsigned elementByteSi
         allocationSize = 1; // Make sure malloc actually allocates something, but not too much. We use null to mean that the buffer is detached.
 
     void* data = Gigacage::tryMalloc(Gigacage::Primitive, allocationSize);
+//    printf("[ MY DEBUG ] data = %p\n", data);
     m_data = DataType(data, sizeInBytes.value());
     if (!data) {
         reset();

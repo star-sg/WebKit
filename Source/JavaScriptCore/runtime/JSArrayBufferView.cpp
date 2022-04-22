@@ -68,6 +68,7 @@ JSArrayBufferView::ConstructionContext::ConstructionContext(
         if (!temp)
             return;
 
+//        printf("[ MY DEBUG ] temp = %p\n", temp);
         m_structure = structure;
         m_vector = VectorType(temp, length);
         m_mode = FastTypedArray;
