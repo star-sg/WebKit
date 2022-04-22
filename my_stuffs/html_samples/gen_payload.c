@@ -28,8 +28,8 @@ void de_bruijn(uint32_t k, uint32_t n, FILE *fp) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2 && argc != 3) {
-        printf("Usage: %s [<filename> | <filename> <pattern>]\n", argv[0]);
+    if (argc != 2 && argc != 3 && argc != 4) {
+        printf("Usage: %s [<filename> | <filename> <pattern>|<position>]\n", argv[0]);
         return -1;
     }
 
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
         de_bruijn(2, 4, fp);
         fclose(fp);
-    } else {
+    } else if (argc == 3) {
         FILE *fp = fopen(argv[1], "rb");
         if (fp == NULL) {
             perror("fopen");
@@ -51,11 +51,11 @@ int main(int argc, char *argv[]) {
         size_t buf_size = 0x200000;
         unsigned char* buf = malloc(buf_size);
         unsigned found = 0;
+        char* endptr;
+        unsigned int inp = strtol(argv[2], &endptr, 10);
         for (size_t i=0; i < 1023; ++i) {
             size_t numread = fread(buf, 1, buf_size, fp);
             if (numread == 0) break;
-            char* endptr;
-            unsigned int inp = strtol(argv[2], &endptr, 10);
             for (size_t j=0; j < numread; j+=4) {
                 unsigned int tmp = *(unsigned int *)((char *)buf + j);
                 if (inp == tmp) {
@@ -67,6 +67,29 @@ int main(int argc, char *argv[]) {
             if (found == 1) break;           
         }
         if (found == 0) printf("-1");
+        free(buf);
+    } else {
+        FILE *fp = fopen(argv[1], "rb");
+        if (fp == NULL) {
+            perror("fopen");
+            return -1;
+        }
+        size_t buf_size = 0x200000;
+        unsigned char* buf = malloc(buf_size);
+        unsigned found = 0;
+        char* endptr;
+        unsigned int inp = strtol(argv[2], &endptr, 10);
+        for (size_t i=0; i < 1023; ++i) {
+            size_t numread = fread(buf, 1, buf_size, fp);
+            if (numread == 0) break;
+            if (i * buf_size + numread > inp) {
+                unsigned int tmp = *(unsigned int *)((char *)buf + inp - i * buf_size);
+                for (size_t j=0; j < 4; ++j)
+                    printf("%d ", *(unsigned char *)((char *)&tmp + j));
+                break;
+            }
+        }
+        free(buf);
     }
     
     return 0;
