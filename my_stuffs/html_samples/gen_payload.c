@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
         for (size_t i=0; i < 1023; ++i) {
             size_t numread = fread(buf, 1, buf_size, fp);
             if (numread == 0) break;
-            for (size_t j=0; j < numread; j+=4) {
+            for (size_t j=0; j < numread; j++) {
                 unsigned int tmp = *(unsigned int *)((char *)buf + j);
                 if (inp == tmp) {
                     printf("%lu", i * buf_size + j);
