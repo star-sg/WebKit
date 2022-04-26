@@ -63,17 +63,11 @@ JSC::JSValue JSHTMLDocument::dumpWebGLBuffer(JSC::JSGlobalObject& globalObject, 
 
 JSC::JSValue JSHTMLDocument::dumpArray(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {
     EnsureStillAliveScope argument0 = callFrame.uncheckedArgument(0);
-    JSInt32Array *object = jsCast<JSInt32Array*>(argument0.value());
-    
-    auto& vm = globalObject.vm();
-    auto* subspace = JSC::subspaceFor<JSInt32Array>(vm);
-    void *converted_raw = bitwise_cast<void *>(object);
-    printf("[ MY DEBUG ] Array = %p\n", converted_raw);
+    void *converted_object = bitwise_cast<void *>(argument0.value());
+    uint64_t addr = (uint64_t)converted_object;
 
-//    (void)globalObject;
-    (void)subspace;
-    (void)vm;
-    return JSC::JSValue();
+    (void)globalObject;
+    return JSValue(addr);
 }
 
 JSC::JSValue JSHTMLDocument::dumpHeap(JSC::JSGlobalObject& globalObject, JSC::CallFrame& callFrame) {

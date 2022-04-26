@@ -86,6 +86,18 @@
 
             let firsts = new Array(0, 0, 0, 0, 1);
             let counts = new Int32Array([1, 1, 1, 1, 1]);
+            let fakeObj = {};
+            console.log("Fake obj: 0x" + document.dumpArray(fakeObj).toString(16));
+
+            if (window.Worker) {
+                let myWorker = new Worker('worker.js');
+                try {
+                    myWorker.postMessage(fakeObj, [fakeObj, fakeObj, fakeObj, fakeObj, fakeObj]);
+                } catch(err) {
+                    
+                }
+            }
+
             ext.multiDrawArraysWEBGL(gl.POINTS, firsts, 0, counts, 0, firsts.length);
 
             gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
